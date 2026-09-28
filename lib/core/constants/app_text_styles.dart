@@ -38,7 +38,7 @@ abstract final class AppTextStyles {
     fontSize: 15,
     fontWeight: FontWeight.w600,
   );
-  static final TextStyle monoGymId = GoogleFonts.geist(
+  static final TextStyle monoGymId = GoogleFonts.jetBrainsMono(
     fontSize: 38,
     fontWeight: FontWeight.w700,
     letterSpacing: 0.76,

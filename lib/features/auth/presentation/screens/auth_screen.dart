@@ -104,10 +104,10 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (!mounted || selectedTime == null) {
       return;
+    } else {
+      controller.text = MaterialLocalizations.of(context)
+          .formatTimeOfDay(selectedTime);
     }
-    if (!mounted) return;
-    controller.text = MaterialLocalizations.of(context)
-        .formatTimeOfDay(selectedTime);
   }
 
   void login() {

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/core/constants/app_radius.dart';
-import 'package:ironbook/core/constants/app_spacing.dart';
+import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 import 'package:ironbook/features/chat/presentation/screens/chat_screen.dart';
 import 'package:ironbook/features/members/presentation/screens/members_screen.dart';
-import 'package:ironbook/features/owner/presentation/screens/owner_home_screen.dart';
+import 'package:ironbook/features/owner_shell/presentation/screens/owner_home_screen.dart';
 import 'package:ironbook/features/plans/presentation/screens/subscription_plans_screen.dart';
+import 'package:ironbook/theme/app_text_styles.dart';
 
 enum OwnerShellPage { home, plans, members, chat }
 
 class OwnerShellScreen extends StatefulWidget {
-  const OwnerShellScreen({super.key, this.initialPage = OwnerShellPage.home});
-
-  final OwnerShellPage initialPage;
+  const OwnerShellScreen({super.key});
 
   @override
   State<OwnerShellScreen> createState() => _OwnerShellScreenState();
@@ -25,8 +23,8 @@ class _OwnerShellScreenState extends State<OwnerShellScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedPage = widget.initialPage;
-    _pageController = PageController(initialPage: widget.initialPage.index);
+    _selectedPage = OwnerShellPage.home;
+    _pageController = PageController(initialPage: _selectedPage.index);
   }
 
   @override
@@ -45,23 +43,24 @@ class _OwnerShellScreenState extends State<OwnerShellScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: AppColors.background,
-    body: PageView(
-      controller: _pageController,
-      onPageChanged: (index) {
-        setState(() {
+    body: Padding(
+      padding: const EdgeInsets.all(24),
+      child: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
           _selectedPage = OwnerShellPage.values[index];
-        });
-      },
-      children: [
-        OwnerHomeScreen(
-          onOpenPlans: () => _showPage(OwnerShellPage.plans),
-          onOpenMembers: () => _showPage(OwnerShellPage.members),
-        ),
-        const SubscriptionPlansScreen(),
-        const MembersScreen(),
-        const ChatScreen(),
-      ],
+          setState(() {});
+        },
+        children: [
+          OwnerHomeScreen(
+            onOpenPlans: () => _showPage(OwnerShellPage.plans),
+            onOpenMembers: () => _showPage(OwnerShellPage.members),
+          ),
+          const SubscriptionPlansScreen(),
+          const MembersScreen(),
+          const ChatScreen(),
+        ],
+      ),
     ),
     bottomNavigationBar: _OwnerBottomNavigationBar(
       selectedPage: _selectedPage,
@@ -87,28 +86,24 @@ class _OwnerBottomNavigationBar extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    top: false,
-    child: Container(
-      height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.border)),
-      ),
-      child: Row(
-        children: [
-          for (final (page, label, icon) in _items)
-            Expanded(
-              child: _OwnerNavigationItem(
-                label: label,
-                icon: icon,
-                selected: selectedPage == page,
-                onTap: () => onSelect(page),
-              ),
-            ),
-        ],
-      ),
+  Widget build(BuildContext context) => Container(
+    height: context.screenHeight * .1,
+    padding: const .all(8),
+    decoration: BoxDecoration(
+      color: AppColors.white,
+      border: Border(top: BorderSide(color: AppColors.border)),
+    ),
+    child: Row(
+      mainAxisAlignment: .spaceEvenly,
+      children: [
+        for (final (page, label, icon) in _items)
+          _OwnerNavigationItem(
+            label: label,
+            icon: icon,
+            selected: selectedPage == page,
+            onTap: () => onSelect(page),
+          ),
+      ],
     ),
   );
 }
@@ -127,32 +122,29 @@ class _OwnerNavigationItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InkWell(
+  Widget build(BuildContext context) => GestureDetector(
     onTap: onTap,
-    borderRadius: BorderRadius.circular(AppRadius.cardLarge),
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 160),
-          width: 44,
-          height: 26,
+          padding: .symmetric(horizontal: 12, vertical: 6),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: selected ? AppColors.accent : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.cardLarge),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Icon(
             icon,
-            size: 17,
+            size: 20,
             color: selected ? AppColors.primary : AppColors.secondary,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
         Text(
           label,
-          style: TextStyle(
-            fontSize: 9,
+          style: AppTextStyles.monoLabel.copyWith(
+            fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             color: selected ? AppColors.primary : AppColors.secondary,
           ),

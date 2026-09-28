@@ -97,7 +97,7 @@ class RoleSelectionScreen extends StatelessWidget {
                           iconBackgroundColor: AppColors.accent,
                           iconColor: AppColors.primary,
                           title: 'Gym Owner',
-                          titleForegroundColor: Colors.white,
+                          titleForegroundColor: AppColors.white,
                           subtitle: 'Manage plans, approve members, chat.',
                           subtitleForegroundColor: const Color(0xFFB5B2AA),
                           onTap: () {
@@ -108,7 +108,7 @@ class RoleSelectionScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
                         RoleOptionCard(
-                          cardColor: Colors.white,
+                          cardColor: AppColors.white,
                           icon: Icons.person_outline,
                           iconBackgroundColor: AppColors.border,
                           iconColor: AppColors.primary,
@@ -139,7 +139,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const CircularProgressIndicator(),

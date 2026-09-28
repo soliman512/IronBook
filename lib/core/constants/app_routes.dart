@@ -20,11 +20,7 @@ abstract final class AppRoutes {
     roleSelection: (_) => const RoleSelectionScreen(),
     auth: (_) => const AuthScreen(),
     ownerShell: (_) => const OwnerShellScreen(),
-    subscriptionPlans: (_) =>
-        const OwnerShellScreen(initialPage: OwnerShellPage.plans),
-    members: (_) => const OwnerShellScreen(initialPage: OwnerShellPage.members),
     joinGym: (_) => const JoinGymScreen(),
     memberHome: (_) => const MemberHomeScreen(),
-    chat: (_) => const OwnerShellScreen(initialPage: OwnerShellPage.chat),
   };
 }
