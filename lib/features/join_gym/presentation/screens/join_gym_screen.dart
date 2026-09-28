@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:ironbook/constants/app_strings.dart';
+import 'package:ironbook/core/constants/app_strings.dart';
 
 class JoinGymScreen extends StatelessWidget {
   const JoinGymScreen({super.key});

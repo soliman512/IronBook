@@ -15,6 +15,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_fonts: ^8.2.1
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +30,7 @@ flutter:
   # fonts:
 
   # in this "flutter" section. Each entry in this list should have a
+
+
+  assets:
+    - assets/images/

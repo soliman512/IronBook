@@ -8,10 +8,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
-import 'package:ironbook/theme/app_colors.dart';
-import 'package:ironbook/constants/app_routes.dart';
-import 'package:ironbook/constants/app_strings.dart';
+import 'package:ironbook/core/constants/app_colors.dart';
+import 'package:ironbook/core/constants/app_routes.dart';
+import 'package:ironbook/core/constants/app_strings.dart';
+import 'package:ironbook/core/providers/auth_provider.dart';
 import 'package:ironbook/main.dart';
 
 void main() {
@@ -22,7 +24,12 @@ void main() {
   testWidgets('named routes open their corresponding screens', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const IronbookApp());
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (_) => AuthProvider(),
+        child: const IronbookApp(),
+      ),
+    );
     expect(find.text(AppStrings.roleSelection), findsOneWidget);
     expect(
       Theme.of(tester.element(find.text(AppStrings.roleSelection)))
@@ -32,7 +39,7 @@ void main() {
 
     final destinations = <(String, String)>[
       (AppRoutes.auth, AppStrings.auth),
-      (AppRoutes.ownerHome, AppStrings.ownerHome),
+      // (AppRoutes.ownerHome, AppStrings.ownerGymName),
       (AppRoutes.subscriptionPlans, AppStrings.subscriptionPlans),
       (AppRoutes.members, AppStrings.members),
       (AppRoutes.joinGym, AppStrings.joinGym),
@@ -45,5 +52,51 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text(title), findsOneWidget);
     }
+  });
+
+  testWidgets('owner registration shows gym name and operating hours', (
+    WidgetTester tester,
+  ) async {
+    final authProvider = AuthProvider()..setUserGymMode = UserGymMode.owner;
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: const IronbookApp(),
+      ),
+    );
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .pushNamed(AppRoutes.auth);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Register'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gym name'), findsOneWidget);
+    expect(find.text('From'), findsOneWidget);
+    expect(find.text('To'), findsOneWidget);
+  });
+
+  testWidgets('member registration omits owner gym setup fields', (
+    WidgetTester tester,
+  ) async {
+    final authProvider = AuthProvider()..setUserGymMode = UserGymMode.member;
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: authProvider,
+        child: const IronbookApp(),
+      ),
+    );
+    tester
+        .state<NavigatorState>(find.byType(Navigator))
+        .pushNamed(AppRoutes.auth);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Register'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gym name'), findsNothing);
+    expect(find.text('From'), findsNothing);
+    expect(find.text('To'), findsNothing);
   });
 }

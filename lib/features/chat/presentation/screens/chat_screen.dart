@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:ironbook/constants/app_strings.dart';
+import 'package:ironbook/core/constants/app_strings.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
