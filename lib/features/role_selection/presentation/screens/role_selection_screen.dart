@@ -190,34 +190,37 @@ class RoleOptionCard extends StatelessWidget {
       borderRadius: .circular(22),
       border: .all(color: AppColors.border),
     ),
-    child: ListTile(
-      onTap: onTap,
-      contentPadding: .zero,
-      leading: Container(
-        height: 48,
-        width: 48,
-        decoration: BoxDecoration(
-          color: iconBackgroundColor,
-          borderRadius: .circular(14),
+    child: Material(
+      child: ListTile(
+        onTap: onTap,
+        contentPadding: .zero,
+        tileColor: cardColor,
+        leading: Container(
+          height: 48,
+          width: 48,
+          decoration: BoxDecoration(
+            color: iconBackgroundColor,
+            borderRadius: .circular(14),
+          ),
+          child: Icon(icon, color: iconColor),
         ),
-        child: Icon(icon, color: iconColor),
-      ),
-      title: Text(
-        title,
-        style: TextTheme.of(context).titleMedium!
-            .copyWith(fontSize: 18, color: titleForegroundColor),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: TextTheme.of(context).bodyMedium!.copyWith(
-          fontSize: 13,
-          fontWeight: .w200,
-          color: subtitleForegroundColor,
+        title: Text(
+          title,
+          style: TextTheme.of(context).titleMedium!
+              .copyWith(fontSize: 18, color: titleForegroundColor),
         ),
-      ),
-      trailing: Icon(
-        Icons.arrow_forward_ios_rounded,
-        color: titleForegroundColor,
+        subtitle: Text(
+          subtitle,
+          style: TextTheme.of(context).bodyMedium!.copyWith(
+            fontSize: 13,
+            fontWeight: .w200,
+            color: subtitleForegroundColor,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios_rounded,
+          color: titleForegroundColor,
+        ),
       ),
     ),
   );
