@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/core/constants/app_text_styles.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 
 //navbar ui
@@ -72,7 +71,7 @@ class NavigationItem<T> extends StatelessWidget {
         ),
         Text(
           item.label,
-          style: AppTextStyles.monoLabel.copyWith(
+          style: TextTheme.of(context).labelSmall!.copyWith(
             fontSize: 12,
             fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             color: selected ? AppColors.primary : AppColors.secondary,

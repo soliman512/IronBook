@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/core/constants/app_text_styles.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 import 'package:ironbook/core/widgets/app_text_form_field.dart';
 import 'package:ironbook/core/widgets/main_button.dart';
-
+// TODO: refactor this page
 class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
 
@@ -49,12 +48,11 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               child: Column(
                 crossAxisAlignment: .start,
                 children: [
-                  Text('Plans', style: AppTextStyles.screenTitle),
+                  Text('Plans', style: TextTheme.of(context).titleLarge!),
                   Text(
                     'What members can request',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.secondary,
-                    ),
+                    style: TextTheme.of(context).bodyLarge!
+                        .copyWith(color: AppColors.secondary),
                   ),
                 ],
               ),
@@ -78,7 +76,8 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               icon: const Icon(Icons.add, size: 21),
               label: Text(
                 'Add plan',
-                style: AppTextStyles.bodyMedium.copyWith(fontWeight: .w600),
+                style: TextTheme.of(context).bodyMedium!
+                    .copyWith(fontWeight: .w600),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.accent,
@@ -87,7 +86,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                   horizontal: 14,
                   vertical: 12,
                 ),
-                textStyle: AppTextStyles.buttonText,
+                textStyle: TextTheme.of(context).labelLarge!,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -407,7 +406,7 @@ class _PlanTypeOption extends StatelessWidget {
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppTextStyles.bodyMedium.copyWith(
+                style: TextTheme.of(context).bodyMedium!.copyWith(
                   color: selected ? AppColors.white : AppColors.textMuted,
                   fontWeight: FontWeight.w600,
                 ),
@@ -467,20 +466,16 @@ class _PlanPreview extends StatelessWidget {
                 children: [
                   Text(
                     'CARD PREVIEW',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: const Color(0xFF687500),
-                      fontSize: 11,
-                    ),
+                    style: TextTheme.of(context).bodyMedium!
+                        .copyWith(color: const Color(0xFF687500), fontSize: 11),
                   ),
                   const SizedBox(width: 6),
                   const Icon(Icons.circle, size: 8, color: AppColors.accent),
                   const SizedBox(width: 5),
                   Text(
                     isTimeBased ? 'Time Pass' : 'Session Pass',
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                    ),
+                    style: TextTheme.of(context).bodyLarge!
+                        .copyWith(color: AppColors.textMuted, fontSize: 11),
                   ),
                 ],
               ),
@@ -531,7 +526,10 @@ class _PlanCard extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 4,
                     children: [
-                      Text(plan.name, style: AppTextStyles.planCardTitle),
+                      Text(
+                        plan.name,
+                        style: TextTheme.of(context).titleMedium!,
+                      ),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -554,10 +552,8 @@ class _PlanCard extends StatelessWidget {
                   ),
                   Text(
                     plan.details,
-                    style: AppTextStyles.bodyText.copyWith(
-                      color: AppColors.textMuted,
-                      fontSize: 14,
-                    ),
+                    style: TextTheme.of(context).bodyLarge!
+                        .copyWith(color: AppColors.textMuted, fontSize: 14),
                   ),
                 ],
               ),

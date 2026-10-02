@@ -24,17 +24,17 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.primary,
   );
-  static final TextStyle bodyText = GoogleFonts.geist(
+  static final TextStyle bodyText = GoogleFonts.bricolageGrotesque(
     fontSize: 14.5,
     fontWeight: FontWeight.w400,
     color: AppColors.primary,
   );
-  static final TextStyle bodyMedium = GoogleFonts.geist(
+  static final TextStyle bodyMedium = GoogleFonts.bricolageGrotesque(
     fontSize: 14.5,
     fontWeight: FontWeight.w500,
     color: AppColors.primary,
   );
-  static final TextStyle buttonText = GoogleFonts.geist(
+  static final TextStyle buttonText = GoogleFonts.bricolageGrotesque(
     fontSize: 15,
     fontWeight: FontWeight.w600,
   );
@@ -44,7 +44,7 @@ abstract final class AppTextStyles {
     letterSpacing: 0.76,
     color: AppColors.primary,
   );
-  static final TextStyle monoLabel = GoogleFonts.geist(
+  static final TextStyle monoLabel = GoogleFonts.jetBrainsMono(
     fontSize: 11,
     fontWeight: FontWeight.w600,
     color: AppColors.secondary,

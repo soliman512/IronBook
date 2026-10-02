@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_spacing.dart';
-import 'package:ironbook/core/constants/app_text_styles.dart';
 
 class MainButton extends StatelessWidget {
   const MainButton({
@@ -34,10 +33,8 @@ class MainButton extends StatelessWidget {
         children: [
           Text(
             title,
-            style: AppTextStyles.planCardTitle.copyWith(
-              fontSize: 16,
-              color: Colors.white,
-            ),
+            style: TextTheme.of(context).titleMedium!
+                .copyWith(fontSize: 16, color: Colors.white),
           ),
           const SizedBox(width: AppSpacing.sm),
           Icon(icon),

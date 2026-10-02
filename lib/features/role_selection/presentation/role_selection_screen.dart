@@ -4,7 +4,6 @@ import 'package:ironbook/core/constants/app_routes.dart';
 
 import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/core/constants/app_text_styles.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 import 'package:ironbook/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -86,9 +85,8 @@ class RoleSelectionScreen extends StatelessWidget {
                         ),
                         Text(
                           "Choose how you'll use Ironbook.",
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: AppColors.textMuted,
-                          ),
+                          style: TextTheme.of(context).bodyMedium!
+                              .copyWith(color: AppColors.textMuted),
                         ),
                         const Spacer(),
                         RoleOptionCard(

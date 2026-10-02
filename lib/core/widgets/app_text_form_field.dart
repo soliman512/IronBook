@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
-import 'package:ironbook/core/constants/app_text_styles.dart';
 
 class AppTextFormField extends StatelessWidget {
   const AppTextFormField({
@@ -20,6 +19,7 @@ class AppTextFormField extends StatelessWidget {
     this.onTap,
     this.readOnly = false,
     this.enabled = true,
+    this.maxLength,
   });
 
   final String title;
@@ -40,13 +40,17 @@ class AppTextFormField extends StatelessWidget {
   final bool readOnly;
 
   final bool enabled;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: AppTextStyles.bodyMedium.copyWith(fontSize: 12)),
+        Text(
+          title,
+          style: TextTheme.of(context).bodyMedium!.copyWith(fontSize: 12),
+        ),
 
         const SizedBox(height: 6),
 
@@ -60,20 +64,18 @@ class AppTextFormField extends StatelessWidget {
           onTap: onTap,
           enabled: enabled,
           readOnly: readOnly,
-          style: AppTextStyles.bodyMedium,
+          style: TextTheme.of(context).bodyMedium!,
+          maxLength: maxLength,
           decoration: InputDecoration(
             hintText: hintText,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
-
             filled: true,
             fillColor: AppColors.white,
 
             contentPadding: const .all(16),
-            hintStyle: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.secondary,
-              fontSize: 12,
-            ),
+            hintStyle: TextTheme.of(context).bodyMedium!
+                .copyWith(color: AppColors.secondary, fontSize: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppRadius.input),
               borderSide: const BorderSide(color: AppColors.inputBorder),

@@ -7,7 +7,6 @@ import 'package:ironbook/core/constants/app_text_styles.dart';
 
 abstract final class AppTheme {
   static final ThemeData light = ThemeData(
-    
     useMaterial3: true,
     colorScheme: const ColorScheme.light(
       primary: AppColors.primary,

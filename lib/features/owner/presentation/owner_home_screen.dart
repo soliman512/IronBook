@@ -44,7 +44,7 @@ class OwnerHomeScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Hi, Tarek',
-                        style: AppTextStyles.bodyMedium.copyWith(
+                        style: TextTheme.of(context).bodyMedium!.copyWith(
                           color: AppColors.secondary,
                           fontWeight: .w300,
                         ),
@@ -52,7 +52,7 @@ class OwnerHomeScreen extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         AppStrings.ownerGymName,
-                        style: AppTextStyles.screenTitle,
+                        style: TextTheme.of(context).titleLarge!,
                       ),
                     ],
                   ),
@@ -96,10 +96,8 @@ class OwnerHomeScreen extends StatelessWidget {
                   const SizedBox(height: 14),
                   Text(
                     'GYM ID',
-                    style: AppTextStyles.monoLabel.copyWith(
-                      color: AppColors.secondary,
-                      fontSize: 11,
-                    ),
+                    style: TextTheme.of(context).labelSmall!
+                        .copyWith(color: AppColors.secondary, fontSize: 11),
                   ),
                   Row(
                     mainAxisAlignment: .spaceBetween,
@@ -126,9 +124,8 @@ class OwnerHomeScreen extends StatelessWidget {
                             horizontal: 12,
                             vertical: 8,
                           ),
-                          textStyle: AppTextStyles.bodyMedium.copyWith(
-                            fontSize: 12.5,
-                          ),
+                          textStyle: TextTheme.of(context).bodyMedium!
+                              .copyWith(fontSize: 12.5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -141,10 +138,8 @@ class OwnerHomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     'Share this code with members so they can find your gym and request a plan.',
-                    style: AppTextStyles.monoLabel.copyWith(
-                      color: AppColors.secondary,
-                      fontSize: 12,
-                    ),
+                    style: TextTheme.of(context).labelSmall!
+                        .copyWith(color: AppColors.secondary, fontSize: 12),
                   ),
                 ],
               ),
@@ -231,15 +226,13 @@ class _DashboardStat extends StatelessWidget {
       children: [
         Text(
           value,
-          style: AppTextStyles.planCardTitle.copyWith(fontSize: 34),
+          style: TextTheme.of(context).titleMedium!.copyWith(fontSize: 34),
           textAlign: .center,
         ),
         Text(
           label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.secondary,
-            fontSize: 12,
-          ),
+          style: TextTheme.of(context).bodyMedium!
+              .copyWith(color: AppColors.secondary, fontSize: 12),
         ),
       ],
     ),
@@ -260,38 +253,39 @@ class _DashboardAction extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => ListTile(
-    onTap: onTap,
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    child: ListTile(
+      onTap: onTap,
 
-    contentPadding: const .symmetric(horizontal: 16, vertical: 8),
-    leading: Container(
-      width: 42,
-      height: 42,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.neutral2,
-        borderRadius: BorderRadius.circular(AppRadius.badge),
+      contentPadding: const .symmetric(horizontal: 16, vertical: 8),
+      leading: Container(
+        width: 42,
+        height: 42,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: AppColors.neutral2,
+          borderRadius: BorderRadius.circular(AppRadius.badge),
+        ),
+        child: Icon(icon, size: 16, color: AppColors.primary),
       ),
-      child: Icon(icon, size: 16, color: AppColors.primary),
-    ),
 
-    title: Text(
-      title,
-      style: AppTextStyles.bodyMedium.copyWith(fontWeight: .w600),
-    ),
+      title: Text(
+        title,
+        style: TextTheme.of(context).bodyMedium!.copyWith(fontWeight: .w600),
+      ),
 
-    subtitle: Text(
-      detail,
-      style: AppTextStyles.bodyMedium.copyWith(
+      subtitle: Text(
+        detail,
+        style: TextTheme.of(context).bodyMedium!
+            .copyWith(color: AppColors.secondary, fontSize: 13),
+      ),
+
+      trailing: const Icon(
+        Icons.chevron_right_rounded,
         color: AppColors.secondary,
-        fontSize: 13,
+        size: 28,
       ),
-    ),
-
-    trailing: const Icon(
-      Icons.chevron_right_rounded,
-      color: AppColors.secondary,
-      size: 28,
     ),
   );
 }
