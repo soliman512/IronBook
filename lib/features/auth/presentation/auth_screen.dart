@@ -121,6 +121,9 @@ class _AuthScreenState extends State<AuthScreen> {
     if (isOwner) {
       Navigator.pushNamed(context, AppRoutes.ownerShell);
     }
+    else {
+      Navigator.pushNamed(context, AppRoutes.memberShell);
+    }
     if (!termsAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please accept the terms to continue.')),

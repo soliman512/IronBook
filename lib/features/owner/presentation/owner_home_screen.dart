@@ -51,7 +51,7 @@ class OwnerHomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        AppStrings.ownerGymName,
+                        'Iron Yard Gym',
                         style: TextTheme.of(context).titleLarge!,
                       ),
                     ],
@@ -64,7 +64,7 @@ class OwnerHomeScreen extends StatelessWidget {
                     foregroundColor: AppColors.primary,
                     minimumSize: const Size(40, 40),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.input),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   icon: Transform.flip(
@@ -181,7 +181,7 @@ class OwnerHomeScreen extends StatelessWidget {
                   const Divider(height: 1, indent: 14, endIndent: 14),
                   _DashboardAction(
                     icon: Icons.groups_outlined,
-                    title: AppStrings.members,
+                    title: 'Members & Requests',
                     detail: '6 active · 0 pending',
                     onTap: onOpenMembers,
                   ),

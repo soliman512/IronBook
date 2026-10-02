@@ -41,7 +41,6 @@ void main() {
       (AppRoutes.auth, AppStrings.auth),
       // (AppRoutes.ownerHome, AppStrings.ownerGymName),
       (AppRoutes.subscriptionPlans, AppStrings.subscriptionPlans),
-      (AppRoutes.members, AppStrings.members),
       (AppRoutes.joinGym, AppStrings.joinGym),
       (AppRoutes.memberHome, AppStrings.memberHome),
       (AppRoutes.chat, AppStrings.chat),
