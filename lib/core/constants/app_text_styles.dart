@@ -34,6 +34,11 @@ abstract final class AppTextStyles {
     fontWeight: FontWeight.w500,
     color: AppColors.primary,
   );
+  static final TextStyle specialBodyMedium = GoogleFonts.libertinusSerif(
+    fontSize: 14,
+    color: AppColors.primary,
+    fontWeight: FontWeight.w700,
+  );
   static final TextStyle buttonText = GoogleFonts.bricolageGrotesque(
     fontSize: 15,
     fontWeight: FontWeight.w600,

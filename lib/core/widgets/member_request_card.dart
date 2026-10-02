@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/features/owner/models/member_models.dart';
 
@@ -49,11 +48,7 @@ class MemberRequestCard extends StatelessWidget {
                   ),
                   child: Text(
                     request.initials,
-                    style: GoogleFonts.libertinusSerif(
-                      fontSize: 14,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextTheme.of(context).bodySmall!,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -63,17 +58,14 @@ class MemberRequestCard extends StatelessWidget {
                     children: [
                       Text(
                         request.name,
-                        style: GoogleFonts.libertinusSerif(
-                          fontSize: 14,
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: TextTheme.of(context).bodySmall!,
                       ),
                       Text(
                         '${request.plan} · ${request.requestTime}',
-                        style: GoogleFonts.libertinusSerif(
+                        style: TextTheme.of(context).bodySmall!.copyWith(
                           fontSize: 12,
                           color: AppColors.secondary,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                     ],
@@ -91,9 +83,10 @@ class MemberRequestCard extends StatelessWidget {
                   ),
                   child: Text(
                     'Pending',
-                    style: GoogleFonts.libertinusSerif(
+                    style: TextTheme.of(context).bodySmall!.copyWith(
                       fontSize: 12,
                       color: AppColors.primary,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -110,19 +103,16 @@ class MemberRequestCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       request.duration,
-                      style: GoogleFonts.libertinusSerif(
-                        fontSize: 14,
-                        color: AppColors.primary,
+                      style: TextTheme.of(context).bodySmall!.copyWith(
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.secondary,
                       ),
                     ),
                   ),
                   Text(
                     request.price,
-                    style: GoogleFonts.libertinusSerif(
-                      fontSize: 16,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextTheme.of(context).bodySmall!
+                        .copyWith(fontSize: 16),
                   ),
                 ],
               ),
@@ -144,11 +134,8 @@ class MemberRequestCard extends StatelessWidget {
                     ),
                     child: Text(
                       'Reject',
-                      style: GoogleFonts.libertinusSerif(
-                        fontSize: 14,
-                        color: AppColors.danger,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: TextTheme.of(context).bodySmall!
+                          .copyWith(color: AppColors.danger),
                     ),
                   ),
                 ),
@@ -168,11 +155,8 @@ class MemberRequestCard extends StatelessWidget {
                     ),
                     child: Text(
                       'Approve',
-                      style: GoogleFonts.libertinusSerif(
-                        fontSize: 14,
-                        color: AppColors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: TextTheme.of(context).bodySmall!
+                          .copyWith(color: AppColors.white),
                     ),
                   ),
                 ),

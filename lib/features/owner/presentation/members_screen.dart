@@ -67,6 +67,7 @@ class _MembersScreenState extends State<MembersScreen> {
       crossAxisAlignment: .start,
       children: [
         Text('Members', style: TextTheme.of(context).titleLarge!),
+        const SizedBox(height: 18),
         AppSwitcher(
           selectedIndex: selectedIndex,
           onSelected: (index) {

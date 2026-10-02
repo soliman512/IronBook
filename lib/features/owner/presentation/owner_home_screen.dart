@@ -138,7 +138,7 @@ class OwnerHomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     'Share this code with members so they can find your gym and request a plan.',
-                    style: TextTheme.of(context).labelSmall!
+                    style: TextTheme.of(context).bodyMedium!
                         .copyWith(color: AppColors.secondary, fontSize: 12),
                   ),
                 ],

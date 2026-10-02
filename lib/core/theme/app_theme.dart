@@ -27,6 +27,7 @@ abstract final class AppTheme {
       titleMedium: AppTextStyles.planCardTitle,
       bodyLarge: AppTextStyles.bodyText,
       bodyMedium: AppTextStyles.bodyMedium,
+      bodySmall: AppTextStyles.specialBodyMedium,
       labelLarge: AppTextStyles.buttonText,
       labelSmall: AppTextStyles.monoLabel,
     ),
