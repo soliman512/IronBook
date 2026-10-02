@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
@@ -32,6 +33,12 @@ abstract final class AppTheme {
       labelSmall: AppTextStyles.monoLabel,
     ),
     appBarTheme: AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: .light,
+        statusBarIconBrightness: .dark,
+        systemNavigationBarColor: Colors.transparent,
+      ),
       backgroundColor: AppColors.background,
       foregroundColor: AppColors.primary,
       elevation: 0,

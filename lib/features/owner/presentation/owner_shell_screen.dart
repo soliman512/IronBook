@@ -60,7 +60,7 @@ class _OwnerShellScreenState extends State<OwnerShellScreen> {
         children: List.generate(
           pages.length,
           ((index) =>
-              Padding(padding: .fromLTRB(24, 24, 24, 0), child: pages[index])),
+              Padding(padding: .fromLTRB(24, 48, 24, 0), child: pages[index])),
         ),
       ),
       bottomNavigationBar: ValueListenableBuilder(

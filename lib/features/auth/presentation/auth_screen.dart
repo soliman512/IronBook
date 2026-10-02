@@ -148,7 +148,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       body: SingleChildScrollView(
-        padding: const .all(24),
+        padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

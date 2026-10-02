@@ -146,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       Expanded(
                         child: AppTextFormField(
                           controller: messageController,
-                          hintText: 'write any thing....',
+                          hintText: 'write any thing..',
                         ),
                       ),
                       const SizedBox(width: 10),

@@ -151,7 +151,7 @@ class RoleSelectionScreen extends StatelessWidget {
   }
 }
 
-class RoleOptionCard extends StatelessWidget {
+class RoleOptionCard extends StatefulWidget {
   const RoleOptionCard({
     super.key,
     required this.cardColor,
@@ -176,50 +176,65 @@ class RoleOptionCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => Container(
-    margin: .zero,
-    padding: .symmetric(vertical: 10, horizontal: 20),
-    alignment: .center,
-    decoration: BoxDecoration(
-      boxShadow: [
-        BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 4)),
-      ],
-      color: cardColor,
-      borderRadius: .circular(22),
-      border: .all(color: AppColors.border),
-    ),
-    child: Material(
-      child: ListTile(
-        onTap: onTap,
-        contentPadding: .zero,
-        tileColor: cardColor,
-        leading: Container(
-          height: 48,
-          width: 48,
-          decoration: BoxDecoration(
-            color: iconBackgroundColor,
-            borderRadius: .circular(14),
+  State<RoleOptionCard> createState() => _RoleOptionCardState();
+}
+
+class _RoleOptionCardState extends State<RoleOptionCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _pressed ? 0.95 : 1,
+      duration: const Duration(milliseconds: 120),
+      child: Material(
+        color: widget.cardColor,
+        borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: BorderRadius.circular(22),
+          splashColor: AppColors.accent.withValues(alpha: .2),
+          overlayColor: WidgetStatePropertyAll<Color?>(
+            AppColors.accent.withValues(alpha: .12),
           ),
-          child: Icon(icon, color: iconColor),
-        ),
-        title: Text(
-          title,
-          style: TextTheme.of(context).titleMedium!
-              .copyWith(fontSize: 18, color: titleForegroundColor),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextTheme.of(context).bodyMedium!.copyWith(
-            fontSize: 13,
-            fontWeight: .w200,
-            color: subtitleForegroundColor,
+          onTapDown: (_) => setState(() => _pressed = true),
+          onTapUp: (_) => setState(() => _pressed = false),
+          onTapCancel: () => setState(() => _pressed = false),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            child: ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  color: widget.iconBackgroundColor,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(widget.icon, color: widget.iconColor),
+              ),
+              title: Text(
+                widget.title,
+                style: Theme.of(context).textTheme.titleMedium!
+                    .copyWith(fontSize: 18, color: widget.titleForegroundColor),
+              ),
+              subtitle: Text(
+                widget.subtitle,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w200,
+                  color: widget.subtitleForegroundColor,
+                ),
+              ),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                color: widget.titleForegroundColor,
+              ),
+            ),
           ),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios_rounded,
-          color: titleForegroundColor,
         ),
       ),
-    ),
-  );
+    );
+  }
 }
