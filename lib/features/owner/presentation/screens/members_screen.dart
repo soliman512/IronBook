@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
 import 'package:ironbook/core/widgets/app_switcher.dart';
-import 'package:ironbook/features/owner/models/member_models.dart';
+import 'package:ironbook/features/owner/models/member_request_models.dart';
 import 'package:ironbook/core/widgets/member_request_card.dart';
+import 'package:ironbook/features/owner/models/subscription_plan_model.dart';
 
 class MembersScreen extends StatefulWidget {
   const MembersScreen({super.key});
@@ -13,50 +14,6 @@ class MembersScreen extends StatefulWidget {
 }
 
 class _MembersScreenState extends State<MembersScreen> {
-  static const members = <Member>[
-    Member(name: 'Nour Adel', plan: 'Monthly · 18 days left'),
-    Member(name: 'Maya Karim', plan: 'Monthly · 12 days left'),
-    Member(name: 'Omar Aziz', plan: 'Annual · 94 days left'),
-    Member(name: 'Lina Hassan', plan: 'Monthly · 3 days left'),
-  ];
-
-  final requests = <MemberRequest>[
-    MemberRequest(
-      name: 'Omar Hassan',
-      plan: 'Monthly',
-      requestTime: 'Just now',
-      duration: '30 days · Unlimited sessions',
-      price: '500 EGP',
-    ),
-    MemberRequest(
-      name: 'Sara Mohamed',
-      plan: 'Monthly',
-      requestTime: '12 min ago',
-      duration: '30 days · 12 sessions',
-      price: '450 EGP',
-    ),
-    MemberRequest(
-      name: 'Sara Mohamed',
-      plan: 'Monthly',
-      requestTime: '12 min ago',
-      duration: '30 days · 12 sessions',
-      price: '450 EGP',
-    ),
-    MemberRequest(
-      name: 'Youssef Ali',
-      plan: 'Annual',
-      requestTime: '25 min ago',
-      duration: '90 days · Unlimited sessions',
-      price: '1,200 EGP',
-    ),
-    MemberRequest(
-      name: 'Youssef Ali',
-      plan: 'Annual',
-      requestTime: '25 min ago',
-      duration: '90 days · Unlimited sessions',
-      price: '1,200 EGP',
-    ),
-  ];
 
   int selectedIndex = 0;
 
@@ -77,7 +34,7 @@ class _MembersScreenState extends State<MembersScreen> {
           },
           children: [
             Text(
-              'Members · ${members.length}',
+              'Members · ${4}',
               style: TextTheme.of(context).bodyMedium,
             ),
             Row(
@@ -90,7 +47,7 @@ class _MembersScreenState extends State<MembersScreen> {
                   foregroundColor: AppColors.accent,
                   radius: 10,
                   child: Text(
-                    "${requests.length}",
+                    "${3}",
                     style: TextTheme.of(context).bodyMedium!
                         .copyWith(color: AppColors.accent, fontSize: 10),
                   ),
@@ -113,11 +70,10 @@ class _MembersScreenState extends State<MembersScreen> {
                   ),
                   child: ListView.separated(
                     shrinkWrap: true,
-                    itemCount: members.length,
+                    itemCount: 4,
                     separatorBuilder: (context, index) =>
                         Divider(color: AppColors.border),
                     itemBuilder: (context, index) {
-                      final member = members[index];
 
                       return Material(
                         color: Colors.transparent,
@@ -126,18 +82,18 @@ class _MembersScreenState extends State<MembersScreen> {
                           leading: CircleAvatar(
                             backgroundColor: AppColors.neutral2,
                             child: Text(
-                              member.initials,
+                              'AH',
                               style: TextTheme.of(context).bodyMedium!
                                   .copyWith(fontWeight: FontWeight.w700),
                             ),
                           ),
                           title: Text(
-                            member.name,
+                            'ahmed',
                             style: TextTheme.of(context).bodyMedium!
                                 .copyWith(fontWeight: FontWeight.w700),
                           ),
                           subtitle: Text(
-                            member.plan,
+                            'member.plan',
                             style: TextTheme.of(context).bodyMedium!.copyWith(
                               color: AppColors.textMuted,
                               fontSize: 10,
@@ -155,7 +111,7 @@ class _MembersScreenState extends State<MembersScreen> {
                               ),
                             ),
                             child: Text(
-                              member.status,
+                              'pending',
                               style: TextTheme.of(context).labelSmall!.copyWith(
                                 color: AppColors.success,
                                 fontWeight: FontWeight.w700,
@@ -168,13 +124,12 @@ class _MembersScreenState extends State<MembersScreen> {
                   ),
                 )
               : ListView.builder(
-                  itemCount: requests.length,
+                  itemCount: 4,
                   itemBuilder: (context, index) {
-                    final request = requests[index];
                     return MemberRequestCard(
-                      request: request,
-                      onReject: () => setState(() => requests.removeAt(index)),
-                      onApprove: () => setState(() => requests.removeAt(index)),
+                      request: 'request',
+                      onReject: () {},
+                      onApprove: () {},
                     );
                   },
                 ),

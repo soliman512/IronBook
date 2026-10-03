@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/features/owner/models/member_models.dart';
+import 'package:ironbook/features/owner/models/member_request_models.dart';
 
 class MemberRequestCard extends StatelessWidget {
   const MemberRequestCard({
@@ -10,7 +10,7 @@ class MemberRequestCard extends StatelessWidget {
     super.key,
   });
 
-  final MemberRequest request;
+  final String request;
   final VoidCallback onReject;
   final VoidCallback onApprove;
 
@@ -47,7 +47,7 @@ class MemberRequestCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    request.initials,
+                    'AK',
                     style: TextTheme.of(context).bodySmall!,
                   ),
                 ),
@@ -57,11 +57,11 @@ class MemberRequestCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        request.name,
+                        'request.name',
                         style: TextTheme.of(context).bodySmall!,
                       ),
                       Text(
-                        '${request.plan} · ${request.requestTime}',
+                        '${'request.plan'} · ${'request.requestTime'}',
                         style: TextTheme.of(context).bodySmall!.copyWith(
                           fontSize: 12,
                           color: AppColors.secondary,
@@ -102,7 +102,7 @@ class MemberRequestCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      request.duration,
+                      'request.duration',
                       style: TextTheme.of(context).bodySmall!.copyWith(
                         fontWeight: FontWeight.w400,
                         color: AppColors.secondary,
@@ -110,7 +110,7 @@ class MemberRequestCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    request.price,
+                    'request.price',
                     style: TextTheme.of(context).bodySmall!
                         .copyWith(fontSize: 16),
                   ),

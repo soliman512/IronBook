@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ironbook/features/auth/models/user_model.dart';
 
-enum UserGymMode { owner, member }
 
 class AuthProvider extends ChangeNotifier {
   UserGymMode? _userGymMode;

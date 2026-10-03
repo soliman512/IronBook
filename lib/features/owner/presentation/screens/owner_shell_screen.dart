@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/widgets/bottom_nav_bar.dart';
-import 'package:ironbook/features/chat/presentation/chat_screen.dart';
-import 'package:ironbook/features/owner/presentation/members_screen.dart';
-import 'package:ironbook/features/owner/presentation/owner_home_screen.dart';
-import 'package:ironbook/features/owner/presentation/subscription_plans_screen.dart';
+import 'package:ironbook/features/chat/presentation/screens/chat_screen.dart';
+import 'package:ironbook/features/owner/presentation/screens/members_screen.dart';
+import 'package:ironbook/features/owner/presentation/screens/owner_home_screen.dart';
+import 'package:ironbook/features/owner/presentation/screens/subscription_plans_screen.dart';
 
 enum OwnerShellPage { home, plans, members, chat }
 

@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 
 import 'package:ironbook/core/constants/app_routes.dart';
 import 'package:ironbook/core/constants/app_strings.dart';
-import 'package:ironbook/core/providers/auth_provider.dart';
+import 'package:ironbook/features/auth/providers/auth_provider.dart';
 import 'package:ironbook/core/theme/app_theme.dart';
+import 'package:ironbook/features/loading/presentation/screens/loading_screen.dart';
+import 'package:ironbook/features/loading/providers/loading_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -14,7 +16,10 @@ void main() {
       .then((_) {
         runApp(
           MultiProvider(
-            providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+            providers: [
+              ChangeNotifierProvider(create: (_) => AuthProvider()),
+              ChangeNotifierProvider(create: (_) => LoadingProvider()),
+            ],
 
             child: const IronbookApp(),
           ),
@@ -28,17 +33,20 @@ class IronbookApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.transparent,),
+        systemNavigationBarColor: Colors.transparent,
+      ),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: AppStrings.appName,
         theme: AppTheme.light,
         initialRoute: AppRoutes.roleSelection,
         routes: AppRoutes.routes,
+        builder: (context, child) =>
+            Stack(children: [child!, const LoadingScreen()]),
       ),
     );
   }

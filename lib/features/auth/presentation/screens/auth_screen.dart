@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_routes.dart';
-
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
 import 'package:ironbook/core/constants/app_spacing.dart';
-import 'package:ironbook/core/providers/auth_provider.dart';
+import 'package:ironbook/features/auth/models/user_model.dart';
+import 'package:ironbook/features/auth/providers/auth_provider.dart';
 import 'package:ironbook/core/widgets/app_switcher.dart';
 import 'package:ironbook/core/widgets/app_text_form_field.dart';
 import 'package:ironbook/core/widgets/main_button.dart';
+import 'package:ironbook/features/loading/providers/loading_provider.dart';
 import 'package:provider/provider.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -120,8 +123,7 @@ class _AuthScreenState extends State<AuthScreen> {
     //TODO: this just for now , change navigation line to another line when work on firebase
     if (isOwner) {
       Navigator.pushNamed(context, AppRoutes.ownerShell);
-    }
-    else {
+    } else {
       Navigator.pushNamed(context, AppRoutes.memberShell);
     }
     if (!termsAccepted) {
@@ -275,14 +277,20 @@ class _AuthScreenState extends State<AuthScreen> {
             child: const Text('Forgot password?'),
           ),
         ),
-        const SizedBox(height: 120),
+        const SizedBox(height: 60),
         SizedBox(
           height: 54,
           child: MainButton(
             title: 'Log in',
             icon: Icons.arrow_forward_ios,
             color: AppColors.primary,
-            onPressed: login,
+            onPressed: () async {
+              context.read<LoadingProvider>().show();
+              await Future.delayed(const Duration(seconds: 3));
+              login();
+              if (!mounted) return;
+              context.read<LoadingProvider>().hide();
+            },
           ),
         ),
         const SizedBox(height: 16),

@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:ironbook/core/extenstions/screen_size_extension.dart';
+import 'package:ironbook/features/auth/models/user_model.dart';
+import 'package:ironbook/features/auth/providers/auth_provider.dart';
+import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/core/constants/app_images.dart';
 import 'package:ironbook/core/constants/app_routes.dart';
-
-import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/core/extenstions/screen_size_extension.dart';
-import 'package:ironbook/core/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
@@ -16,6 +16,7 @@ class RoleSelectionScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          //background cebnter shape(arm)
           Positioned(
             right: 0,
             bottom: context.screenHeight * .35,
@@ -127,29 +128,12 @@ class RoleSelectionScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          //loading:
-          Visibility(
-            visible: false,
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.35),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const CircularProgressIndicator(),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 }
+
 
 class RoleOptionCard extends StatefulWidget {
   const RoleOptionCard({

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_images.dart';
-import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/core/widgets/app_text_form_field.dart';
 
 class ChatScreen extends StatefulWidget {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_images.dart';
-import 'package:ironbook/core/widgets/main_button.dart';
 
 class MemberStatItem {
   const MemberStatItem({

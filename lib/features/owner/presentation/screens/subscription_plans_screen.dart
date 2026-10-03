@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 import 'package:ironbook/core/widgets/app_text_form_field.dart';
 import 'package:ironbook/core/widgets/main_button.dart';
-// TODO: refactor this page
+import 'package:ironbook/features/owner/models/subscription_plan_model.dart';
+
 class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
 
@@ -15,40 +15,61 @@ class SubscriptionPlansScreen extends StatefulWidget {
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
-  final _plans = <_Plan>[
-    _Plan(
+  final _plans = <SubscriptionPlan>[
+    SubscriptionPlan(
+      id: '1',
       name: 'Monthly',
-      type: 'TIME-BASED',
-      details: '30 days · Unlimited sessions',
-      price: '500',
+      type: SubscriptionPlanType.timeBased,
+      price: 500,
+      durationInDays: 30,
+      gymId: 'gym_1',
     ),
-    _Plan(
+    SubscriptionPlan(
+      id: '2',
       name: '12 Sessions',
-      type: 'SESSION-BASED',
-      details: '12 sessions · Valid 60 days',
-      price: '500',
+      type: SubscriptionPlanType.sessionBased,
+      price: 500,
+      sessionCount: 12,
+      validityInDays: 60,
+      gymId: 'gym_1',
     ),
-    _Plan(
+    SubscriptionPlan(
+      id: '3',
       name: 'Quarterly',
-      type: 'TIME-BASED',
-      details: '90 days · Unlimited sessions',
-      price: '1,300',
+      type: SubscriptionPlanType.timeBased,
+      price: 1300,
+      durationInDays: 90,
+      gymId: 'gym_1',
     ),
   ];
+
+  void _showAddSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _NewPlanSheet(
+        onSubmit: (plan) {
+          setState(() => _plans.insert(0, plan));
+          Navigator.pop(context);
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
     child: Column(
-      crossAxisAlignment: .stretch,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
-          crossAxisAlignment: .center,
           children: [
             Expanded(
               child: Column(
-                crossAxisAlignment: .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Plans', style: TextTheme.of(context).titleLarge!),
+                  Text('Plans', style: TextTheme.of(context).titleLarge),
                   Text(
                     'What members can request',
                     style: TextTheme.of(context).bodyLarge!
@@ -59,25 +80,12 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ),
             const SizedBox(width: 8),
             FilledButton.icon(
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (sheetContext) => _NewPlanSheet(
-                    onSubmit: (plan) {
-                      setState(() => _plans.insert(0, plan));
-                      Navigator.pop(context);
-                    },
-                  ),
-                );
-              },
+              onPressed: _showAddSheet,
               icon: const Icon(Icons.add, size: 21),
               label: Text(
                 'Add plan',
                 style: TextTheme.of(context).bodyMedium!
-                    .copyWith(fontWeight: .w600),
+                    .copyWith(fontWeight: FontWeight.w600),
               ),
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.accent,
@@ -86,7 +94,6 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                   horizontal: 14,
                   vertical: 12,
                 ),
-                textStyle: TextTheme.of(context).labelLarge!,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
@@ -98,75 +105,75 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
         for (int i = 0; i < _plans.length; i++) ...[
           _PlanCard(
             plan: _plans[i],
-            onDelete: () {
-              setState(() {
-                _plans.removeAt(i);
-              });
-            },
+            onDelete: () => setState(() => _plans.removeAt(i)),
           ),
-          if (_plans[i] != _plans.last) const SizedBox(height: 12),
+          if (i != _plans.length - 1) const SizedBox(height: 12),
         ],
       ],
     ),
   );
 }
 
-class _Plan {
-  const _Plan({
-    required this.name,
-    required this.type,
-    required this.details,
-    required this.price,
-  });
-
-  final String name;
-  final String type;
-  final String details;
-  final String price;
-}
-
 class _NewPlanSheet extends StatefulWidget {
   const _NewPlanSheet({required this.onSubmit});
-
-  final ValueChanged<_Plan> onSubmit;
-
+  final ValueChanged<SubscriptionPlan> onSubmit;
   @override
   State<_NewPlanSheet> createState() => _NewPlanSheetState();
 }
 
 class _NewPlanSheetState extends State<_NewPlanSheet> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _durationController = TextEditingController();
-  final _sessionsController = TextEditingController();
-  final _validityController = TextEditingController();
+  final _name = TextEditingController();
+  final _price = TextEditingController();
+  final _duration = TextEditingController();
+  final _sessions = TextEditingController();
+  final _validity = TextEditingController();
   bool _isTimeBased = true;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _priceController.dispose();
-    _durationController.dispose();
-    _sessionsController.dispose();
-    _validityController.dispose();
+    _name.dispose();
+    _price.dispose();
+    _duration.dispose();
+    _sessions.dispose();
+    _validity.dispose();
     super.dispose();
   }
 
+  String get _details => _isTimeBased
+      ? '${_duration.text} days \u00b7 Unlimited sessions'
+      : '${_sessions.text} sessions \u00b7 Valid ${_validity.text} days';
+
   void _submit() {
     if (!_formKey.currentState!.validate()) return;
-
-    final details = _isTimeBased
-        ? '${_durationController.text} days · Unlimited sessions'
-        : '${_sessionsController.text} sessions · Valid ${_validityController.text} days';
     widget.onSubmit(
-      _Plan(
-        name: _nameController.text.trim(),
-        type: _isTimeBased ? 'TIME-BASED' : 'SESSION-BASED',
-        details: details,
-        price: _priceController.text.trim(),
+      SubscriptionPlan(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: _name.text.trim(),
+        type: _isTimeBased
+            ? SubscriptionPlanType.timeBased
+            : SubscriptionPlanType.sessionBased,
+        price: double.parse(_price.text.trim()),
+        durationInDays: _isTimeBased ? int.parse(_duration.text.trim()) : null,
+        sessionCount: _isTimeBased ? null : int.parse(_sessions.text.trim()),
+        validityInDays: _isTimeBased ? null : int.parse(_validity.text.trim()),
+        gymId: 'gym_1',
       ),
     );
+  }
+
+  String? _requiredInt(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Required';
+    final n = int.tryParse(v.trim());
+    if (n == null || n < 1) return 'Enter a positive number';
+    return null;
+  }
+
+  String? _requiredPrice(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Required';
+    final n = double.tryParse(v.trim());
+    if (n == null || n <= 0) return 'Enter a valid price';
+    return null;
   }
 
   @override
@@ -175,18 +182,18 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
       constraints: BoxConstraints(maxHeight: context.screenHeight * 0.94),
       clipBehavior: Clip.antiAlias,
       padding: context.isKeyboardOpend
-          ? .only(bottom: context.keyboardInsets)
-          : .zero,
-      decoration: BoxDecoration(
+          ? EdgeInsets.only(bottom: context.keyboardInsets)
+          : EdgeInsets.zero,
+      decoration: const BoxDecoration(
         color: AppColors.background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(18),
+          padding: const EdgeInsets.all(18),
           child: Column(
-            crossAxisAlignment: .stretch,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
                 child: Container(
@@ -224,10 +231,9 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                       ],
                     ),
                   ),
-                  //close button
                   IconButton.filledTonal(
                     tooltip: 'Close',
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
                     style: IconButton.styleFrom(
                       foregroundColor: AppColors.primary,
@@ -241,19 +247,15 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                 ],
               ),
               const SizedBox(height: 18),
-              _PlanTypeSelector(
-                isTimeBased: _isTimeBased,
-                onChanged: (value) => setState(() => _isTimeBased = value),
-              ),
+              _buildTypeToggle(),
               const SizedBox(height: 16),
               AppTextFormField(
                 title: 'PLAN NAME*',
-                controller: _nameController,
+                controller: _name,
                 suffixIcon: const Icon(Icons.edit_outlined),
                 onChanged: (_) => setState(() {}),
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Enter a plan name'
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Enter a plan name' : null,
               ),
               const SizedBox(height: 16),
               Row(
@@ -261,59 +263,42 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                 children: [
                   Expanded(
                     child: AppTextFormField(
-                      controller: _priceController,
+                      controller: _price,
                       title: 'PRICE (EGP)*',
                       keyboardType: TextInputType.number,
                       onChanged: (_) => setState(() {}),
-                      validator: _requiredNumber,
+                      validator: _requiredPrice,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: _isTimeBased
-                        ? AppTextFormField(
-                            controller: _durationController,
-                            title: 'DAYS*',
-                            keyboardType: TextInputType.number,
-                            onChanged: (_) => setState(() {}),
-                            validator: _requiredNumber,
-                          )
-                        : AppTextFormField(
-                            controller: _sessionsController,
-                            title: 'SESSION*',
-                            keyboardType: TextInputType.number,
-                            onChanged: (_) => setState(() {}),
-                            validator: _requiredNumber,
-                          ),
+                    child: AppTextFormField(
+                      controller: _isTimeBased ? _duration : _sessions,
+                      title: _isTimeBased ? 'DAYS*' : 'SESSION*',
+                      keyboardType: TextInputType.number,
+                      onChanged: (_) => setState(() {}),
+                      validator: _requiredInt,
+                    ),
                   ),
                 ],
               ),
               if (!_isTimeBased) ...[
                 const SizedBox(height: 16),
                 AppTextFormField(
-                  controller: _validityController,
+                  controller: _validity,
                   title: 'VALIDITY (DAYS)*',
                   keyboardType: TextInputType.number,
                   onChanged: (_) => setState(() {}),
-                  validator: _requiredNumber,
+                  validator: _requiredInt,
                 ),
               ],
               const SizedBox(height: 20),
-              _PlanPreview(
-                name: _nameController.text,
-                price: _priceController.text,
-                details: _isTimeBased
-                    ? '${_durationController.text} days · Unlimited sessions'
-                    : '${_sessionsController.text} sessions · Valid ${_validityController.text} days',
-                isTimeBased: _isTimeBased,
-              ),
+              _buildPreview(),
               const SizedBox(height: 16),
               SizedBox(
                 height: 54,
                 child: MainButton(
-                  onPressed: () {
-                    _submit();
-                  },
+                  onPressed: _submit,
                   title: 'Add Plan',
                   icon: Icons.add,
                   color: AppColors.primary,
@@ -326,210 +311,189 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
     );
   }
 
-  String? _requiredNumber(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Required';
-    final number = int.tryParse(value.trim());
-    if (number == null || number < 1) return 'Enter a positive number';
-    return null;
-  }
-}
-
-class _PlanTypeSelector extends StatelessWidget {
-  const _PlanTypeSelector({required this.isTimeBased, required this.onChanged});
-
-  final bool isTimeBased;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(4),
-    decoration: BoxDecoration(
-      color: AppColors.neutral,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: _PlanTypeOption(
+  Widget _buildTypeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.neutral,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _toggleOption(
             label: 'Time-based',
             icon: Icons.calendar_today_outlined,
-            selected: isTimeBased,
-            onTap: () => onChanged(true),
+            selected: _isTimeBased,
+            onTap: () => setState(() => _isTimeBased = true),
           ),
-        ),
-        Expanded(
-          child: _PlanTypeOption(
+          _toggleOption(
             label: 'Session-based',
             icon: Icons.swap_horiz,
-            selected: !isTimeBased,
-            onTap: () => onChanged(false),
+            selected: !_isTimeBased,
+            onTap: () => setState(() => _isTimeBased = false),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
-class _PlanTypeOption extends StatelessWidget {
-  const _PlanTypeOption({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: selected ? AppColors.primary : Colors.transparent,
-    borderRadius: BorderRadius.circular(8),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: SizedBox(
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 19,
-              color: selected ? AppColors.white : AppColors.textMuted,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextTheme.of(context).bodyMedium!.copyWith(
+  Widget _toggleOption({
+    required String label,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: Material(
+        color: selected ? AppColors.primary : Colors.transparent,
+        borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: SizedBox(
+            height: 48,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 19,
                   color: selected ? AppColors.white : AppColors.textMuted,
-                  fontWeight: FontWeight.w600,
                 ),
-              ),
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextTheme.of(context).bodyMedium!.copyWith(
+                      color: selected ? AppColors.white : AppColors.textMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-class _PlanPreview extends StatelessWidget {
-  const _PlanPreview({
-    required this.name,
-    required this.price,
-    required this.details,
-    required this.isTimeBased,
-  });
-
-  final String name;
-  final String price;
-  final String details;
-  final bool isTimeBased;
-
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: AppColors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: AppColors.primary.withValues(alpha: 0.04),
-          blurRadius: 8,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    ),
-    child: Row(
-      children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            color: AppColors.accent,
-            borderRadius: BorderRadius.circular(8),
+  Widget _buildPreview() {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          child: const Icon(Icons.badge_outlined, color: AppColors.primary),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'CARD PREVIEW',
-                    style: TextTheme.of(context).bodyMedium!
-                        .copyWith(color: const Color(0xFF687500), fontSize: 11),
-                  ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.circle, size: 8, color: AppColors.accent),
-                  const SizedBox(width: 5),
-                  Text(
-                    isTimeBased ? 'Time Pass' : 'Session Pass',
-                    style: TextTheme.of(context).bodyLarge!
-                        .copyWith(color: AppColors.textMuted, fontSize: 11),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 3),
-              Text(
-                '$name · $price EGP · $details',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.libertinusSerif(
-                  fontSize: 13,
-                  color: AppColors.primary,
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.accent,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.badge_outlined, color: AppColors.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'CARD PREVIEW',
+                      style: TextTheme.of(context).bodyMedium!.copyWith(
+                        color: const Color(0xFF687500),
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(Icons.circle, size: 8, color: AppColors.accent),
+                    const SizedBox(width: 5),
+                    Text(
+                      _isTimeBased ? 'Time Pass' : 'Session Pass',
+                      style: TextTheme.of(context).bodyLarge!
+                          .copyWith(color: AppColors.textMuted, fontSize: 11),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 3),
+                Text(
+                  '${_name.text} \u00b7 ${_price.text} EGP \u00b7 $_details',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.libertinusSerif(
+                    fontSize: 13,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _PlanCard extends StatelessWidget {
   const _PlanCard({required this.plan, required this.onDelete});
+  final SubscriptionPlan plan;
   final VoidCallback onDelete;
-  final _Plan plan;
+
+  String get _typeLabel => plan.type == SubscriptionPlanType.timeBased
+      ? 'TIME-BASED'
+      : 'SESSION-BASED';
+
+  String get _details {
+    if (plan.type == SubscriptionPlanType.timeBased)
+      return '${plan.durationInDays} days \u00b7 Unlimited sessions';
+    return '${plan.sessionCount} sessions \u00b7 Valid ${plan.validityInDays} days';
+  }
+
+  String get _price {
+    if (plan.price.truncateToDouble() == plan.price)
+      return plan.price.toInt().toString();
+    return plan.price.toStringAsFixed(2);
+  }
 
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
       color: AppColors.white,
-      border: Border.all(color: AppColors.border, width: 1),
+      border: Border.all(color: AppColors.border),
       borderRadius: BorderRadius.circular(20),
     ),
     child: Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          crossAxisAlignment: .start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
                 spacing: 4,
-                crossAxisAlignment: .start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Wrap(
-                    crossAxisAlignment: .center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 8,
                     runSpacing: 4,
                     children: [
-                      Text(
-                        plan.name,
-                        style: TextTheme.of(context).titleMedium!,
-                      ),
+                      Text(plan.name, style: TextTheme.of(context).titleMedium),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -540,7 +504,7 @@ class _PlanCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
-                          plan.type,
+                          _typeLabel,
                           style: GoogleFonts.jetBrainsMono(
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
@@ -551,7 +515,7 @@ class _PlanCard extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    plan.details,
+                    _details,
                     style: TextTheme.of(context).bodyLarge!
                         .copyWith(color: AppColors.textMuted, fontSize: 14),
                   ),
@@ -564,7 +528,6 @@ class _PlanCard extends StatelessWidget {
               style: IconButton.styleFrom(
                 foregroundColor: AppColors.danger,
                 fixedSize: const Size(42, 42),
-                padding: EdgeInsets.zero,
                 side: const BorderSide(color: AppColors.errorBackground),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -573,17 +536,16 @@ class _PlanCard extends StatelessWidget {
             ),
           ],
         ),
-        //divider
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 14),
           child: Divider(height: 1, color: AppColors.neutral2),
         ),
         Row(
-          crossAxisAlignment: .baseline,
-          textBaseline: .alphabetic,
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              plan.price,
+              _price,
               style: GoogleFonts.jetBrainsMono(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
