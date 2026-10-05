@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
-import 'package:ironbook/core/widgets/app_text_form_field.dart';
-import 'package:ironbook/core/widgets/main_button.dart';
-import 'package:ironbook/features/owner/models/subscription_plan_model.dart';
+import 'package:ironbook/core/global_widgets/app_text_form_field.dart';
+import 'package:ironbook/core/global_widgets/main_button.dart';
+import 'package:ironbook/features/auth/providers/gym_provider.dart';
+import 'package:ironbook/features/loading/providers/loading_provider.dart';
+import 'package:ironbook/features/owner/models/plan_model.dart';
+import 'package:ironbook/features/owner/models/services/plan_services.dart';
+import 'package:provider/provider.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
   const SubscriptionPlansScreen({super.key});
@@ -15,33 +19,80 @@ class SubscriptionPlansScreen extends StatefulWidget {
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
-  final _plans = <SubscriptionPlan>[
-    SubscriptionPlan(
-      id: '1',
-      name: 'Monthly',
-      type: SubscriptionPlanType.timeBased,
-      price: 500,
-      durationInDays: 30,
-      gymId: 'gym_1',
-    ),
-    SubscriptionPlan(
-      id: '2',
-      name: '12 Sessions',
-      type: SubscriptionPlanType.sessionBased,
-      price: 500,
-      sessionCount: 12,
-      validityInDays: 60,
-      gymId: 'gym_1',
-    ),
-    SubscriptionPlan(
-      id: '3',
-      name: 'Quarterly',
-      type: SubscriptionPlanType.timeBased,
-      price: 1300,
-      durationInDays: 90,
-      gymId: 'gym_1',
-    ),
-  ];
+  List<SubscriptionPlan?> _plans = [];
+
+  @override
+  void initState() {
+    super.initState();
+    showAllPlans();
+  }
+
+  Future<void> showAllPlans() async {
+    try {
+      _plans = await PlanServices.getPlans(
+        context.read<GymProvider>().getGym!.id,
+      );
+
+      if (!mounted) return;
+
+      setState(() {});
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Problem when fetching plans, try again later.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _createNewPlan(SubscriptionPlan plan) async {
+    try {
+      await PlanServices.createPlan(plan);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('plan added successfully'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Problem when creating plan, try again later.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
+
+  Future<void> _deletePlan(String id) async {
+    try {
+      await PlanServices.deletePlan(id);
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('plan removed successfully'),
+          backgroundColor: AppColors.warning,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Problem when creating plan, try again later.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
+  }
 
   void _showAddSheet() {
     showModalBottomSheet(
@@ -50,84 +101,124 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (_) => _NewPlanSheet(
-        onSubmit: (plan) {
-          setState(() => _plans.insert(0, plan));
-          Navigator.pop(context);
+        onSubmit: (plan) async {
+          context.read<LoadingProvider>().show();
+
+          try {
+            await _createNewPlan(plan);
+
+            if (!mounted) return;
+
+            await showAllPlans();
+            Navigator.pop(context);
+          } finally {
+            if (mounted) {
+              context.read<LoadingProvider>().hide();
+            }
+          }
         },
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Plans', style: TextTheme.of(context).titleLarge),
+                    Text(
+                      'What members can request',
+                      style: TextTheme.of(context).bodyLarge!
+                          .copyWith(color: AppColors.secondary),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              FilledButton.icon(
+                onPressed: _showAddSheet,
+                icon: const Icon(Icons.add, size: 21),
+                label: Text(
+                  'Add plan',
+                  style: TextTheme.of(context).bodyMedium!
+                      .copyWith(fontWeight: FontWeight.w600),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          if (_plans.isEmpty)
+            const Center(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Plans', style: TextTheme.of(context).titleLarge),
+                  Icon(Icons.hourglass_empty_outlined),
                   Text(
-                    'What members can request',
-                    style: TextTheme.of(context).bodyLarge!
-                        .copyWith(color: AppColors.secondary),
+                    'No subscription plans available.\nAdd a plan to get started.',
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            FilledButton.icon(
-              onPressed: _showAddSheet,
-              icon: const Icon(Icons.add, size: 21),
-              label: Text(
-                'Add plan',
-                style: TextTheme.of(context).bodyMedium!
-                    .copyWith(fontWeight: FontWeight.w600),
-              ),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+          if (_plans.isNotEmpty)
+            ..._plans.map(
+              (plan) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: PlanCard(
+                  plan: plan!,
+                  onDelete: () async {
+                    context.read<LoadingProvider>().show();
+                    await _deletePlan(plan.id!);
+                    await showAllPlans();
+                    if (!mounted) return;
+                    context.read<LoadingProvider>().hide();
+                    setState(() {});
+                  },
                 ),
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 18),
-        for (int i = 0; i < _plans.length; i++) ...[
-          _PlanCard(
-            plan: _plans[i],
-            onDelete: () => setState(() => _plans.removeAt(i)),
-          ),
-          if (i != _plans.length - 1) const SizedBox(height: 12),
         ],
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
 
 class _NewPlanSheet extends StatefulWidget {
   const _NewPlanSheet({required this.onSubmit});
-  final ValueChanged<SubscriptionPlan> onSubmit;
+
+  final Future<void> Function(SubscriptionPlan) onSubmit;
+
   @override
   State<_NewPlanSheet> createState() => _NewPlanSheetState();
 }
 
 class _NewPlanSheetState extends State<_NewPlanSheet> {
   final _formKey = GlobalKey<FormState>();
+
   final _name = TextEditingController();
   final _price = TextEditingController();
   final _duration = TextEditingController();
   final _sessions = TextEditingController();
   final _validity = TextEditingController();
+
   bool _isTimeBased = true;
 
   @override
@@ -138,42 +229,6 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
     _sessions.dispose();
     _validity.dispose();
     super.dispose();
-  }
-
-  String get _details => _isTimeBased
-      ? '${_duration.text} days \u00b7 Unlimited sessions'
-      : '${_sessions.text} sessions \u00b7 Valid ${_validity.text} days';
-
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    widget.onSubmit(
-      SubscriptionPlan(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _name.text.trim(),
-        type: _isTimeBased
-            ? SubscriptionPlanType.timeBased
-            : SubscriptionPlanType.sessionBased,
-        price: double.parse(_price.text.trim()),
-        durationInDays: _isTimeBased ? int.parse(_duration.text.trim()) : null,
-        sessionCount: _isTimeBased ? null : int.parse(_sessions.text.trim()),
-        validityInDays: _isTimeBased ? null : int.parse(_validity.text.trim()),
-        gymId: 'gym_1',
-      ),
-    );
-  }
-
-  String? _requiredInt(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Required';
-    final n = int.tryParse(v.trim());
-    if (n == null || n < 1) return 'Enter a positive number';
-    return null;
-  }
-
-  String? _requiredPrice(String? v) {
-    if (v == null || v.trim().isEmpty) return 'Required';
-    final n = double.tryParse(v.trim());
-    if (n == null || n <= 0) return 'Enter a valid price';
-    return null;
   }
 
   @override
@@ -247,17 +302,121 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                 ],
               ),
               const SizedBox(height: 18),
-              _buildTypeToggle(),
+
+              // Plan type
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.neutral,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Material(
+                        color: _isTimeBased
+                            ? AppColors.primary
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isTimeBased = true;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            height: 48,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 19,
+                                  color: _isTimeBased
+                                      ? AppColors.white
+                                      : AppColors.textMuted,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Time-based',
+                                  style: TextTheme.of(context).bodyMedium!
+                                      .copyWith(
+                                        color: _isTimeBased
+                                            ? AppColors.white
+                                            : AppColors.textMuted,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Material(
+                        color: !_isTimeBased
+                            ? AppColors.primary
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isTimeBased = false;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            height: 48,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.swap_horiz,
+                                  size: 19,
+                                  color: !_isTimeBased
+                                      ? AppColors.white
+                                      : AppColors.textMuted,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Session-based',
+                                  style: TextTheme.of(context).bodyMedium!
+                                      .copyWith(
+                                        color: !_isTimeBased
+                                            ? AppColors.white
+                                            : AppColors.textMuted,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 16),
+
               AppTextFormField(
                 title: 'PLAN NAME*',
                 controller: _name,
                 suffixIcon: const Icon(Icons.edit_outlined),
-                onChanged: (_) => setState(() {}),
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Enter a plan name' : null,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Enter a plan name';
+                  }
+
+                  return null;
+                },
               ),
+
               const SizedBox(height: 16),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -266,8 +425,19 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                       controller: _price,
                       title: 'PRICE (EGP)*',
                       keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                      validator: _requiredPrice,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Required';
+                        }
+
+                        final price = double.tryParse(value.trim());
+
+                        if (price == null || price <= 0) {
+                          return 'Enter a valid price';
+                        }
+
+                        return null;
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -276,29 +446,169 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
                       controller: _isTimeBased ? _duration : _sessions,
                       title: _isTimeBased ? 'DAYS*' : 'SESSION*',
                       keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                      validator: _requiredInt,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Required';
+                        }
+
+                        final number = int.tryParse(value.trim());
+
+                        if (number == null || number < 1) {
+                          return 'Enter a positive number';
+                        }
+
+                        return null;
+                      },
                     ),
                   ),
                 ],
               ),
+
               if (!_isTimeBased) ...[
                 const SizedBox(height: 16),
                 AppTextFormField(
                   controller: _validity,
                   title: 'VALIDITY (DAYS)*',
                   keyboardType: TextInputType.number,
-                  onChanged: (_) => setState(() {}),
-                  validator: _requiredInt,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Required';
+                    }
+
+                    final number = int.tryParse(value.trim());
+
+                    if (number == null || number < 1) {
+                      return 'Enter a positive number';
+                    }
+
+                    return null;
+                  },
                 ),
               ],
+
               const SizedBox(height: 20),
-              _buildPreview(),
+
+              ListenableBuilder(
+                listenable: Listenable.merge([
+                  _name,
+                  _price,
+                  _duration,
+                  _sessions,
+                  _validity,
+                ]),
+                builder: (context, child) {
+                  final details = _isTimeBased
+                      ? '${_duration.text} days · Unlimited sessions'
+                      : '${_sessions.text} sessions · Valid ${_validity.text} days';
+
+                  return Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.04),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.badge_outlined,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    'CARD PREVIEW',
+                                    style: TextTheme.of(context).bodyMedium!
+                                        .copyWith(
+                                          color: const Color(0xFF687500),
+                                          fontSize: 11,
+                                        ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  const Icon(
+                                    Icons.circle,
+                                    size: 8,
+                                    color: AppColors.accent,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    _isTimeBased ? 'Time Pass' : 'Session Pass',
+                                    style: TextTheme.of(context).bodyLarge!
+                                        .copyWith(
+                                          color: AppColors.textMuted,
+                                          fontSize: 11,
+                                        ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                '${_name.text} · ${_price.text} EGP · $details',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.libertinusSerif(
+                                  fontSize: 13,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+
               const SizedBox(height: 16),
+
               SizedBox(
                 height: 54,
                 child: MainButton(
-                  onPressed: _submit,
+                  onPressed: () async {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    final plan = SubscriptionPlan(
+                      name: _name.text.trim(),
+                      type: _isTimeBased
+                          ? SubscriptionPlanType.timeBased
+                          : SubscriptionPlanType.sessionBased,
+                      price: double.parse(_price.text.trim()),
+                      durationInDays: _isTimeBased
+                          ? int.parse(_duration.text.trim())
+                          : null,
+                      sessionCount: _isTimeBased
+                          ? null
+                          : int.parse(_sessions.text.trim()),
+                      validityInDays: _isTimeBased
+                          ? null
+                          : int.parse(_validity.text.trim()),
+                      gymId: context.read<GymProvider>().getGym!.id,
+                    );
+
+                    await widget.onSubmit(plan);
+                  },
                   title: 'Add Plan',
                   icon: Icons.add,
                   color: AppColors.primary,
@@ -310,260 +620,124 @@ class _NewPlanSheetState extends State<_NewPlanSheet> {
       ),
     );
   }
-
-  Widget _buildTypeToggle() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: AppColors.neutral,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          _toggleOption(
-            label: 'Time-based',
-            icon: Icons.calendar_today_outlined,
-            selected: _isTimeBased,
-            onTap: () => setState(() => _isTimeBased = true),
-          ),
-          _toggleOption(
-            label: 'Session-based',
-            icon: Icons.swap_horiz,
-            selected: !_isTimeBased,
-            onTap: () => setState(() => _isTimeBased = false),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _toggleOption({
-    required String label,
-    required IconData icon,
-    required bool selected,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: Material(
-        color: selected ? AppColors.primary : Colors.transparent,
-        borderRadius: BorderRadius.circular(8),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: SizedBox(
-            height: 48,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  size: 19,
-                  color: selected ? AppColors.white : AppColors.textMuted,
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextTheme.of(context).bodyMedium!.copyWith(
-                      color: selected ? AppColors.white : AppColors.textMuted,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPreview() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.badge_outlined, color: AppColors.primary),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'CARD PREVIEW',
-                      style: TextTheme.of(context).bodyMedium!.copyWith(
-                        color: const Color(0xFF687500),
-                        fontSize: 11,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(Icons.circle, size: 8, color: AppColors.accent),
-                    const SizedBox(width: 5),
-                    Text(
-                      _isTimeBased ? 'Time Pass' : 'Session Pass',
-                      style: TextTheme.of(context).bodyLarge!
-                          .copyWith(color: AppColors.textMuted, fontSize: 11),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  '${_name.text} \u00b7 ${_price.text} EGP \u00b7 $_details',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.libertinusSerif(
-                    fontSize: 13,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({required this.plan, required this.onDelete});
+class PlanCard extends StatelessWidget {
+  const PlanCard({super.key, required this.plan, required this.onDelete});
+
   final SubscriptionPlan plan;
   final VoidCallback onDelete;
 
-  String get _typeLabel => plan.type == SubscriptionPlanType.timeBased
-      ? 'TIME-BASED'
-      : 'SESSION-BASED';
-
-  String get _details {
-    if (plan.type == SubscriptionPlanType.timeBased)
-      return '${plan.durationInDays} days \u00b7 Unlimited sessions';
-    return '${plan.sessionCount} sessions \u00b7 Valid ${plan.validityInDays} days';
-  }
-
-  String get _price {
-    if (plan.price.truncateToDouble() == plan.price)
-      return plan.price.toInt().toString();
-    return plan.price.toStringAsFixed(2);
-  }
-
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: AppColors.white,
-      border: Border.all(color: AppColors.border),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                spacing: 4,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: [
-                      Text(plan.name, style: TextTheme.of(context).titleMedium),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+  Widget build(BuildContext context) {
+    final isTimeBased = plan.type == SubscriptionPlanType.timeBased;
+
+    final details = isTimeBased
+        ? '${plan.durationInDays} days · Unlimited sessions'
+        : '${plan.sessionCount} sessions · Valid ${plan.validityInDays} days';
+
+    final price = plan.price.truncateToDouble() == plan.price
+        ? plan.price.toInt().toString()
+        : plan.price.toStringAsFixed(2);
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  spacing: 4,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: [
+                        Text(
+                          plan.name,
+                          style: TextTheme.of(context).titleMedium,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.neutral2,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          _typeLabel,
-                          style: GoogleFonts.jetBrainsMono(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textMuted,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.neutral2,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            isTimeBased ? 'TIME-BASED' : 'SESSION-BASED',
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textMuted,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    _details,
-                    style: TextTheme.of(context).bodyLarge!
-                        .copyWith(color: AppColors.textMuted, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline, size: 21),
-              style: IconButton.styleFrom(
-                foregroundColor: AppColors.danger,
-                fixedSize: const Size(42, 42),
-                side: const BorderSide(color: AppColors.errorBackground),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                      ],
+                    ),
+                    Text(
+                      details,
+                      style: TextTheme.of(context).bodyLarge!
+                          .copyWith(color: AppColors.textMuted, fontSize: 14),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 14),
-          child: Divider(height: 1, color: AppColors.neutral2),
-        ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              _price,
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+              IconButton(
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline, size: 21),
+                style: IconButton.styleFrom(
+                  foregroundColor: AppColors.danger,
+                  fixedSize: const Size(42, 42),
+                  side: const BorderSide(color: AppColors.errorBackground),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'EGP',
-              style: GoogleFonts.jetBrainsMono(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.secondary,
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Divider(height: 1, color: AppColors.neutral2),
+          ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                price,
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+              const SizedBox(width: 6),
+              Text(
+                'EGP',
+                style: GoogleFonts.jetBrainsMono(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.secondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }

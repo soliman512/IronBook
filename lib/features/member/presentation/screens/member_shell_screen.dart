@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ironbook/core/widgets/bottom_nav_bar.dart';
+import 'package:ironbook/core/global_widgets/bottom_nav_bar.dart';
 import 'package:ironbook/features/chat/presentation/screens/chat_screen.dart';
 import 'package:ironbook/features/member/presentation/screens/join_gym_screen.dart';
 import 'package:ironbook/features/member/presentation/screens/member_home_screen.dart';

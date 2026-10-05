@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "820220165217",
+    "project_id": "ironbook-2048",
+    "storage_bucket": "ironbook-2048.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:820220165217:android:d59a91abf97d014149be20",
+        "android_client_info": {
+          "package_name": "com.example.ironbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHuNGof-7gxA0aroAgyXECYD9u9OgV8Lk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

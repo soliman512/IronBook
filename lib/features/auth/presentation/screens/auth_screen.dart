@@ -4,12 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_routes.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
-import 'package:ironbook/core/constants/app_spacing.dart';
+import 'package:ironbook/features/auth/models/generate_auto_gym_id.dart';
+import 'package:ironbook/features/auth/models/gym_model.dart';
 import 'package:ironbook/features/auth/models/user_model.dart';
 import 'package:ironbook/features/auth/providers/auth_provider.dart';
-import 'package:ironbook/core/widgets/app_switcher.dart';
-import 'package:ironbook/core/widgets/app_text_form_field.dart';
-import 'package:ironbook/core/widgets/main_button.dart';
+import 'package:ironbook/core/global_widgets/app_switcher.dart';
+import 'package:ironbook/core/global_widgets/app_text_form_field.dart';
+import 'package:ironbook/core/global_widgets/main_button.dart';
+import 'package:ironbook/features/auth/providers/gym_provider.dart';
+import 'package:ironbook/features/auth/services/auth_services.dart';
+import 'package:ironbook/features/auth/services/gym_services.dart';
 import 'package:ironbook/features/loading/providers/loading_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -119,20 +123,122 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
-  void register({required bool isOwner}) {
-    //TODO: this just for now , change navigation line to another line when work on firebase
-    if (isOwner) {
-      Navigator.pushNamed(context, AppRoutes.ownerShell);
-    } else {
-      Navigator.pushNamed(context, AppRoutes.memberShell);
-    }
-    if (!termsAccepted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept the terms to continue.')),
-      );
-    }
-    if (!registerFormKey.currentState!.validate()) {
-      return;
+  void register({required bool isOwner}) async {
+    //check form state
+    if (registerFormKey.currentState!.validate()) {
+      // check terms accept
+      if (!termsAccepted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please accept the terms to continue.'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+        // stop method if terms not accepted
+        return;
+      }
+      //complete if accepted (else)
+      if (isOwner) {
+        //if the user is owner
+        context.read<LoadingProvider>().show();
+        String? userId = await AuthServices.signup(
+          emailAddress: registerEmailController.text,
+          password: registerPasswordController.text,
+        );
+        if (userId == null || userId.isEmpty) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('there is problem, please try again'),
+              backgroundColor: AppColors.danger,
+            ),
+          );
+          context.read<LoadingProvider>().hide();
+          return;
+        }
+        if (userId == 'weak-password') {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('weak password'),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+          context.read<LoadingProvider>().hide();
+          return;
+        } else if (userId == 'email-already-in-use') {
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('this email is already exist.'),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+
+          context.read<LoadingProvider>().hide();
+          return;
+        }
+        //if user id done :
+        // context.read<AuthProvider>().setUserGymMode = UserGymMode.owner;
+        try {
+          final UserModel userModel = UserModel(
+            id: userId,
+            email: registerEmailController.text,
+            fullName: fullNameController.text,
+            phone: phoneController.text,
+            role: UserGymMode.owner,
+          );
+          await AuthServices.createUserDocument(userModel);
+
+          if (!mounted) return;
+          context.read<AuthProvider>().setUser = userModel;
+        } catch (e) {
+          if (!mounted) return;
+
+          context.read<LoadingProvider>().hide();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'There is a problem saving your data. Please try again.',
+              ),
+              backgroundColor: AppColors.danger,
+            ),
+          );
+
+          context.read<LoadingProvider>().hide();
+          return;
+        }
+
+        //add gym to gyms collection
+        if (!mounted) return;
+        final gym = await GymServices.createGymDocument(
+          GymModel(
+            id: generateGymId(),
+            ownerId: context.read<AuthProvider>().getUser!.id,
+            name: gymNameController.text,
+            workStartAt: openingTimeController.text,
+            workEndAt: closingTimeController.text,
+          ),
+        );
+
+        if (!mounted) return;
+context.read<GymProvider>().setGym = gym;
+        context.read<LoadingProvider>().hide();
+
+        Navigator.pushNamed(context, AppRoutes.ownerShell);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('you\'re signed up successfully.'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        return;
+      } else {
+        //TODO: if the user is member
+        Navigator.pushNamed(context, AppRoutes.memberShell);
+      }
     }
   }
 
@@ -248,7 +354,7 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  //shared
+  //shared (Login fields)
   Widget _buildLoginFields() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,13 +376,13 @@ class _AuthScreenState extends State<AuthScreen> {
           textInputAction: TextInputAction.done,
           validator: validatePassword,
         ),
-        Align(
-          alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: () {},
-            child: const Text('Forgot password?'),
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.centerRight,
+        //   child: TextButton(
+        //     onPressed: () {},
+        //     child: const Text('Forgot password?'),
+        //   ),
+        // ),
         const SizedBox(height: 60),
         SizedBox(
           height: 54,
@@ -314,7 +420,7 @@ class _AuthScreenState extends State<AuthScreen> {
         AppTextFormField(
           title: 'Phone number',
           controller: phoneController,
-          hintText: '01065765512',
+          hintText: '01*********',
           maxLength: 11,
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.next,
@@ -343,7 +449,7 @@ class _AuthScreenState extends State<AuthScreen> {
         AppTextFormField(
           title: 'Phone number',
           controller: phoneController,
-          hintText: '01065765512',
+          hintText: '01*********',
           maxLength: 11,
           keyboardType: TextInputType.phone,
           textInputAction: TextInputAction.next,
@@ -376,7 +482,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 suffixIcon: const Icon(Icons.schedule_outlined),
               ),
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: 8),
             Expanded(
               child: AppTextFormField(
                 title: 'To',
@@ -433,7 +539,7 @@ class _AuthScreenState extends State<AuthScreen> {
               }),
             ),
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: 4),
           Expanded(
             child: Text(
               'I agree to receive updates and accept the terms.',

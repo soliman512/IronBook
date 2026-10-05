@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
-import 'package:ironbook/features/owner/models/member_request_models.dart';
 
 class MemberRequestCard extends StatelessWidget {
   const MemberRequestCard({

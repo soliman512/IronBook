@@ -18,10 +18,18 @@ class GymModel {
     required this.workStartAt,
     required this.workEndAt,
   });
-
   final String id;
   final String ownerId;
   final String name;
   final String workStartAt;
   final String workEndAt;
+
+  Map<String, dynamic> toMap(){
+    return {
+      'ownerId' : ownerId,
+      'name' : name,
+      'workStartAt' : workStartAt,
+      'workEndAt' : workEndAt,
+    };
+  }
 }

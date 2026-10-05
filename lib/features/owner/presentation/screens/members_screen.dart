@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_radius.dart';
-import 'package:ironbook/core/widgets/app_switcher.dart';
-import 'package:ironbook/features/owner/models/member_request_models.dart';
-import 'package:ironbook/core/widgets/member_request_card.dart';
-import 'package:ironbook/features/owner/models/subscription_plan_model.dart';
+import 'package:ironbook/core/global_widgets/app_switcher.dart';
+import 'package:ironbook/core/global_widgets/member_request_card.dart';
 
 class MembersScreen extends StatefulWidget {
   const MembersScreen({super.key});

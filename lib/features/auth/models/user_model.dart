@@ -1,4 +1,3 @@
-
 enum UserGymMode { owner, member }
 
 class UserModel {
@@ -8,7 +7,6 @@ class UserModel {
     required this.fullName,
     required this.phone,
     required this.role,
-    this.gymId,
   });
 
   final String id;
@@ -16,5 +14,23 @@ class UserModel {
   final String fullName;
   final String phone;
   final UserGymMode role;
-  final String? gymId;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'fullName': fullName,
+      'phone': phone,
+      'role': role.name,
+    };
+  }
+
+  factory UserModel.fromMap(Map<String, dynamic> map, String id) {
+    return UserModel(
+      id: id,
+      email: map['email'],
+      fullName: map['fullName'],
+      phone: map['phone'],
+      role: UserGymMode.values.byName(map['rolde']),
+    );
+  }
 }

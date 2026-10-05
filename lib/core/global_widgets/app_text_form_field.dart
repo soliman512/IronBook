@@ -6,7 +6,7 @@ import 'package:ironbook/core/constants/app_radius.dart';
 class AppTextFormField extends StatelessWidget {
   const AppTextFormField({
     super.key,
-     this.title,
+    this.title,
     required this.controller,
     this.hintText,
     this.validator,
@@ -47,11 +47,11 @@ class AppTextFormField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if(title != null)
-        Text(
-          title!,
-          style: TextTheme.of(context).bodyMedium!.copyWith(fontSize: 12),
-        ),
+        if (title != null)
+          Text(
+            title!,
+            style: TextTheme.of(context).bodyMedium!.copyWith(fontSize: 12),
+          ),
 
         const SizedBox(height: 6),
 
@@ -68,6 +68,8 @@ class AppTextFormField extends StatelessWidget {
           style: TextTheme.of(context).bodyMedium!,
           maxLength: maxLength,
           decoration: InputDecoration(
+            errorStyle: TextTheme.of(context).labelSmall!
+                .copyWith(fontSize: 10, color: AppColors.danger),
             hintText: hintText,
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,

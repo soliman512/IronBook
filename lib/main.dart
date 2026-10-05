@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -5,13 +6,15 @@ import 'package:ironbook/core/constants/app_routes.dart';
 import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/features/auth/providers/auth_provider.dart';
 import 'package:ironbook/core/theme/app_theme.dart';
+import 'package:ironbook/features/auth/providers/gym_provider.dart';
 import 'package:ironbook/features/loading/presentation/screens/loading_screen.dart';
 import 'package:ironbook/features/loading/providers/loading_provider.dart';
+import 'package:ironbook/firebase_options.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
         runApp(
@@ -19,6 +22,7 @@ void main() {
             providers: [
               ChangeNotifierProvider(create: (_) => AuthProvider()),
               ChangeNotifierProvider(create: (_) => LoadingProvider()),
+              ChangeNotifierProvider(create: (_) => GymProvider()),
             ],
 
             child: const IronbookApp(),
@@ -43,7 +47,7 @@ class IronbookApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: AppStrings.appName,
         theme: AppTheme.light,
-        initialRoute: AppRoutes.roleSelection,
+        initialRoute: AppRoutes.splash,
         routes: AppRoutes.routes,
         builder: (context, child) =>
             Stack(children: [child!, const LoadingScreen()]),

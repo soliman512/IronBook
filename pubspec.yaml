@@ -12,6 +12,9 @@ environment:
 
   # To add custom fonts to your application, add a fonts section here,
 dependencies:
+  cloud_firestore: ^6.10.0
+  firebase_auth: ^6.7.0
+  firebase_core: ^4.15.0
   flutter:
     sdk: flutter
   flutter_launcher_icons: ^0.14.4
