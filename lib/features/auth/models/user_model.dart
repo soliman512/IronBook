@@ -1,4 +1,4 @@
-enum UserGymMode { owner, member }
+enum UserRole { owner, member }
 
 class UserModel {
   const UserModel({
@@ -13,7 +13,7 @@ class UserModel {
   final String email;
   final String fullName;
   final String phone;
-  final UserGymMode role;
+  final UserRole role;
 
   Map<String, dynamic> toMap() {
     return {
@@ -30,7 +30,7 @@ class UserModel {
       email: map['email'],
       fullName: map['fullName'],
       phone: map['phone'],
-      role: UserGymMode.values.byName(map['rolde']),
+      role: UserRole.values.byName(map['role']),
     );
   }
 }

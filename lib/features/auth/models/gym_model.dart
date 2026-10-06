@@ -32,4 +32,13 @@ class GymModel {
       'workEndAt' : workEndAt,
     };
   }
+  factory GymModel.fromMap(Map<String, dynamic> gymData, String gymId){
+      return GymModel(
+      id: gymId,
+      ownerId: gymData['ownerId'],
+      name: gymData['name'],
+      workStartAt: gymData['workStartAt'],
+      workEndAt: gymData['workEndAt'],
+    );
+  }
 }

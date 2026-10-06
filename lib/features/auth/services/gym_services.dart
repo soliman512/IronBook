@@ -23,4 +23,30 @@ class GymServices {
       );
     }
   }
+
+  static Future<GymModel?> getGym(String ownerId) async {
+    final snapshot = await _firestore
+        .collection('gyms')
+        .where('ownerId', isEqualTo: ownerId)
+        .limit(1)
+        .get();
+    if (snapshot.docs.isEmpty) {
+      return null;
+    }
+    final gym = snapshot.docs.first.data();
+    final String id = snapshot.docs.first.id;
+    return GymModel.fromMap(gym, id);
+  }
+
+  static Future<GymModel?> getGymById(String gymId) async {
+    final gymData = await _firestore
+        .collection('gyms')
+        .doc(gymId)
+        .get();
+    if (!gymData.exists) {
+      return null;
+    }
+    final String id = gymData.id;
+    return GymModel.fromMap(gymData.data()!, id);
+  }
 }

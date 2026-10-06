@@ -1,13 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:ironbook/core/constants/app_colors.dart';
 import 'package:ironbook/core/constants/app_images.dart';
 import 'package:ironbook/core/constants/app_routes.dart';
+import 'package:ironbook/features/auth/models/user_model.dart';
+import 'package:ironbook/features/auth/providers/auth_provider.dart';
+import 'package:ironbook/features/auth/providers/gym_provider.dart';
+import 'package:ironbook/features/auth/services/auth_services.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
+import 'package:ironbook/features/auth/services/gym_services.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
-  const new({super.key});
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -17,10 +24,45 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(Duration(milliseconds: 2000), () {
-      if (!mounted) return;
+    _startApp();
+  }
+
+  Future<void> _startApp() async {
+    await Future.delayed(const Duration(milliseconds: 2000));
+
+    if (!mounted) return;
+
+    final firebaseUser = FirebaseAuth.instance.currentUser;
+
+    //if no uid (first time)
+    if (firebaseUser == null) {
       Navigator.pushReplacementNamed(context, AppRoutes.roleSelection);
-    });
+      return;
+    }
+
+    final user = await AuthServices.getUserData(firebaseUser.uid);
+
+    if (!mounted) return;
+
+    if (user == null) {
+      await FirebaseAuth.instance.signOut();
+
+      if (!mounted) return;
+
+      Navigator.pushReplacementNamed(context, AppRoutes.roleSelection);
+      return;
+    }
+    context.read<AuthProvider>().setUser = user;
+    context.read<AuthProvider>().setUserRole = user.role;
+
+    if (user.role == UserRole.owner) {
+      context.read<GymProvider>().setGym = await GymServices.getGym(user.id);
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, AppRoutes.ownerShell);
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, AppRoutes.memberShell);
   }
 
   @override
@@ -53,7 +95,6 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Column(
                 children: [
                   const Spacer(),
-                  // Logo
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -68,7 +109,6 @@ class _SplashScreenState extends State<SplashScreen> {
                           ),
                         ),
                       ),
-
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
@@ -89,7 +129,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // App name
                   RichText(
                     text: TextSpan(
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -109,7 +148,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Tagline
                   Text(
                     'Your gym. Your goals. \nOne place.',
                     textAlign: TextAlign.center,
@@ -120,7 +158,6 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                   ),
                   const Spacer(),
-
                   SizedBox(
                     width: context.screenWidth * .8,
                     child: Row(
@@ -137,24 +174,11 @@ class _SplashScreenState extends State<SplashScreen> {
                         Text(
                           'please wait...\nwe set all thing for you',
                           style: TextTheme.of(context).bodyMedium,
-                          textAlign: .start,
+                          textAlign: TextAlign.start,
                         ),
                       ],
                     ),
                   ),
-
-                  // SizedBox(
-                  //   width: context.screenWidth * .4,
-                  //   child: Row(
-                  //     children: [
-                  //       Column(
-                  //         children: [
-                  //           Text('we set all thing for you...'),
-                  //         ],
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
                 ],
               ),
             ),

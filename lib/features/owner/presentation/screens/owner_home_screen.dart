@@ -6,6 +6,7 @@ import 'package:ironbook/core/constants/app_radius.dart';
 import 'package:ironbook/core/constants/app_spacing.dart';
 import 'package:ironbook/core/constants/app_strings.dart';
 import 'package:ironbook/core/constants/app_text_styles.dart';
+import 'package:ironbook/core/global_widgets/logout_button.dart';
 import 'package:ironbook/features/auth/models/gym_model.dart';
 import 'package:ironbook/features/auth/models/user_model.dart';
 import 'package:ironbook/features/auth/providers/auth_provider.dart';
@@ -17,9 +18,15 @@ class OwnerHomeScreen extends StatelessWidget {
     super.key,
     required this.onOpenPlans,
     required this.onOpenMembers,
+    this.activeMembersCount = 0,
+    this.pendingRequestsCount = 0,
+    this.plansCount = 0,
   });
 
   final VoidCallback onOpenPlans;
+  final int? plansCount;
+  final int? activeMembersCount;
+  final int? pendingRequestsCount;
   final VoidCallback onOpenMembers;
 
   @override
@@ -66,21 +73,7 @@ class OwnerHomeScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                    style: IconButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      foregroundColor: AppColors.primary,
-                      minimumSize: const Size(40, 40),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    icon: Transform.flip(
-                      flipX: true,
-                      child: const Icon(Icons.logout_outlined, size: 18),
-                    ),
-                  ),
+                  LogoutButton(),
                 ],
               ),
               const SizedBox(height: 16),
@@ -122,7 +115,10 @@ class OwnerHomeScreen extends StatelessWidget {
                         ),
                         TextButton.icon(
                           onPressed: () {
-                            _copyGymId(context, gym != null ? gym.id : 'not found');
+                            _copyGymId(
+                              context,
+                              gym != null ? gym.id : 'not found',
+                            );
                           },
                           style: TextButton.styleFrom(
                             foregroundColor: AppColors.white,
@@ -154,15 +150,18 @@ class OwnerHomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Row(
+              Row(
                 children: [
                   Expanded(
-                    child: _DashboardStat(value: '6', label: 'Active members'),
+                    child: _DashboardStat(
+                      value: activeMembersCount.toString(),
+                      label: 'Active members',
+                    ),
                   ),
                   SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: _DashboardStat(
-                      value: '0',
+                      value: pendingRequestsCount.toString(),
                       label: 'Pending requests',
                     ),
                   ),
@@ -187,14 +186,15 @@ class OwnerHomeScreen extends StatelessWidget {
                     _DashboardAction(
                       icon: Icons.receipt_long_outlined,
                       title: AppStrings.subscriptionPlans,
-                      detail: '3 plans',
+                      detail: '$plansCount plans',
                       onTap: onOpenPlans,
                     ),
                     const Divider(height: 1, indent: 14, endIndent: 14),
                     _DashboardAction(
                       icon: Icons.groups_outlined,
                       title: 'Members & Requests',
-                      detail: '6 active · 0 pending',
+                      detail:
+                          '$activeMembersCount active · $pendingRequestsCount pending',
                       onTap: onOpenMembers,
                     ),
                   ],

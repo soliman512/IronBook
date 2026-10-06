@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:ironbook/core/constants/app_routes.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
@@ -40,9 +41,8 @@ class _AuthScreenState extends State<AuthScreen> {
   final closingTimeController = TextEditingController();
   final registerEmailController = TextEditingController();
   final registerPasswordController = TextEditingController();
-
+  bool _isLoading = false;
   bool termsAccepted = false;
-
   @override
   void dispose() {
     loginEmailController.dispose();
@@ -112,145 +112,247 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!mounted || selectedTime == null) {
       return;
     } else {
+                          if(!context.mounted) return;
+
       controller.text = MaterialLocalizations.of(context)
           .formatTimeOfDay(selectedTime);
     }
   }
 
-  void login() {
-    if (!loginFormKey.currentState!.validate()) {
-      return;
-    }
-  }
+  void login(bool isOwner) async {
+    if (_isLoading) return;
+    if (loginFormKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      context.read<LoadingProvider>().show();
+      try {
+        final user = await AuthServices.loginAndGetUserData(
+          emailAddress: loginEmailController.text,
+          password: loginPasswordController.text,
+        );
+        if (!mounted) return;
+        if (user == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('account not found'),
+              backgroundColor: AppColors.danger,
+            ),
+          );
+          return;
+        }
+        context.read<AuthProvider>().setUser = user;
+        if (isOwner) {
+          if (user.role == UserRole.owner) {
+            //  get owner gym:
+            final gym = await GymServices.getGym(user.id);
+            // owner has no gym
+            if (!mounted) return;
+            if (gym == null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'gym not found for this account, you must resign with another email',
+                  ),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+              return;
+            }
 
-  void register({required bool isOwner}) async {
-    //check form state
-    if (registerFormKey.currentState!.validate()) {
-      // check terms accept
-      if (!termsAccepted) {
+            context.read<GymProvider>().setGym = gym;
+            Navigator.pushReplacementNamed(context, AppRoutes.ownerShell);
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.memberShell);
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please accept the terms to continue.'),
+            content: Text('signed in successfully'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      } on FirebaseAuthException catch (e) {
+        if (!mounted) return;
+
+        String message;
+
+        switch (e.code) {
+          case 'invalid-credential':
+            message = 'Email or password is incorrect.';
+            break;
+
+          case 'user-not-found':
+            message = 'No account found with this email.';
+            break;
+
+          case 'wrong-password':
+            message = 'Incorrect password.';
+            break;
+
+          case 'invalid-email':
+            message = 'Please enter a valid email.';
+            break;
+
+          default:
+            message = 'Something went wrong. Please try again.';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: AppColors.danger),
+        );
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong. Please try again.'),
             backgroundColor: AppColors.danger,
           ),
         );
-        // stop method if terms not accepted
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = true;
+          });
+          context.read<LoadingProvider>().hide();
+        }
+      }
+    }
+  }
+
+  Future<void> register({required bool isOwner}) async {
+    if (!registerFormKey.currentState!.validate()) return;
+
+    if (!termsAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept the terms to continue.'),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    context.read<LoadingProvider>().show();
+
+    try {
+      final userId = await AuthServices.signup(
+        emailAddress: registerEmailController.text.trim(),
+        password: registerPasswordController.text.trim(),
+      );
+
+      if (userId == null || userId.isEmpty) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('There is a problem, please try again.'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
         return;
       }
-      //complete if accepted (else)
+
+      final role = isOwner ? UserRole.owner : UserRole.member;
+
+      final user = UserModel(
+        id: userId,
+        email: registerEmailController.text.trim(),
+        fullName: fullNameController.text.trim(),
+        phone: phoneController.text.trim(),
+        role: role,
+      );
+
+      await AuthServices.createUserDocument(user);
+
+      if (!mounted) return;
+
+      context.read<AuthProvider>().setUser = user;
+
       if (isOwner) {
-        //if the user is owner
-        context.read<LoadingProvider>().show();
-        String? userId = await AuthServices.signup(
-          emailAddress: registerEmailController.text,
-          password: registerPasswordController.text,
-        );
-        if (userId == null || userId.isEmpty) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('there is problem, please try again'),
-              backgroundColor: AppColors.danger,
-            ),
-          );
-          context.read<LoadingProvider>().hide();
-          return;
-        }
-        if (userId == 'weak-password') {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('weak password'),
-              backgroundColor: AppColors.warning,
-            ),
-          );
-          context.read<LoadingProvider>().hide();
-          return;
-        } else if (userId == 'email-already-in-use') {
-          if (!mounted) return;
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('this email is already exist.'),
-              backgroundColor: AppColors.warning,
-            ),
-          );
-
-          context.read<LoadingProvider>().hide();
-          return;
-        }
-        //if user id done :
-        // context.read<AuthProvider>().setUserGymMode = UserGymMode.owner;
-        try {
-          final UserModel userModel = UserModel(
-            id: userId,
-            email: registerEmailController.text,
-            fullName: fullNameController.text,
-            phone: phoneController.text,
-            role: UserGymMode.owner,
-          );
-          await AuthServices.createUserDocument(userModel);
-
-          if (!mounted) return;
-          context.read<AuthProvider>().setUser = userModel;
-        } catch (e) {
-          if (!mounted) return;
-
-          context.read<LoadingProvider>().hide();
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'There is a problem saving your data. Please try again.',
-              ),
-              backgroundColor: AppColors.danger,
-            ),
-          );
-
-          context.read<LoadingProvider>().hide();
-          return;
-        }
-
-        //add gym to gyms collection
-        if (!mounted) return;
         final gym = await GymServices.createGymDocument(
           GymModel(
             id: generateGymId(),
-            ownerId: context.read<AuthProvider>().getUser!.id,
-            name: gymNameController.text,
+            ownerId: user.id,
+            name: gymNameController.text.trim(),
             workStartAt: openingTimeController.text,
             workEndAt: closingTimeController.text,
           ),
         );
 
         if (!mounted) return;
-context.read<GymProvider>().setGym = gym;
-        context.read<LoadingProvider>().hide();
 
-        Navigator.pushNamed(context, AppRoutes.ownerShell);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('you\'re signed up successfully.'),
-            backgroundColor: AppColors.success,
-          ),
-        );
-        return;
+        context.read<GymProvider>().setGym = gym;
+
+        Navigator.pushReplacementNamed(context, AppRoutes.ownerShell);
       } else {
-        //TODO: if the user is member
-        Navigator.pushNamed(context, AppRoutes.memberShell);
+        Navigator.pushReplacementNamed(context, AppRoutes.memberShell);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("You're signed up successfully."),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
+      String message;
+
+      switch (e.code) {
+        case 'weak-password':
+          message = 'Weak password.';
+          break;
+        case 'email-already-in-use':
+          message = 'This email already exists.';
+          break;
+        case 'invalid-email':
+          message = 'Please enter a valid email.';
+          break;
+        default:
+          message = 'Something went wrong. Please try again.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: AppColors.danger),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'There is a problem completing registration. Please try again.',
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+
+        context.read<LoadingProvider>().hide();
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final mode = context.watch<AuthProvider>().getUserGymMode;
-    final isOwner = mode == UserGymMode.owner;
+    final mode = context.watch<AuthProvider>().getUserRole;
+    final isOwner = mode == UserRole.owner;
     final selectedIndex = isLoginSection ? 0 : 1;
 
     final Widget fields;
     if (isLoginSection) {
-      fields = _buildLoginFields();
+      fields = _buildLoginFields(isOwner);
     } else if (isOwner) {
       fields = _buildOwnerRegisterFields();
     } else {
@@ -355,7 +457,7 @@ context.read<GymProvider>().setGym = gym;
   }
 
   //shared (Login fields)
-  Widget _buildLoginFields() {
+  Widget _buildLoginFields(bool isOwner) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -390,13 +492,7 @@ context.read<GymProvider>().setGym = gym;
             title: 'Log in',
             icon: Icons.arrow_forward_ios,
             color: AppColors.primary,
-            onPressed: () async {
-              context.read<LoadingProvider>().show();
-              await Future.delayed(const Duration(seconds: 3));
-              login();
-              if (!mounted) return;
-              context.read<LoadingProvider>().hide();
-            },
+            onPressed: _isLoading ? null : () => login(isOwner),
           ),
         ),
         const SizedBox(height: 16),
@@ -556,7 +652,7 @@ context.read<GymProvider>().setGym = gym;
           title: 'Create account',
           icon: Icons.arrow_forward_rounded,
           color: AppColors.primary,
-          onPressed: () => register(isOwner: isOwner),
+          onPressed: _isLoading ? () {} : () => register(isOwner: isOwner),
         ),
       ),
       const SizedBox(height: 20),

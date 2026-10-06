@@ -9,6 +9,7 @@ import 'package:ironbook/core/theme/app_theme.dart';
 import 'package:ironbook/features/auth/providers/gym_provider.dart';
 import 'package:ironbook/features/loading/presentation/screens/loading_screen.dart';
 import 'package:ironbook/features/loading/providers/loading_provider.dart';
+import 'package:ironbook/features/member/providers/member_ship_provider.dart';
 import 'package:ironbook/firebase_options.dart';
 import 'package:provider/provider.dart';
 
@@ -23,6 +24,7 @@ void main() async {
               ChangeNotifierProvider(create: (_) => AuthProvider()),
               ChangeNotifierProvider(create: (_) => LoadingProvider()),
               ChangeNotifierProvider(create: (_) => GymProvider()),
+              ChangeNotifierProvider(create: (_) => MembershipProvider()),
             ],
 
             child: const IronbookApp(),

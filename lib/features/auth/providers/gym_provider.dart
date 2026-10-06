@@ -6,7 +6,7 @@ class GymProvider extends ChangeNotifier {
 
   GymModel? get getGym => _gymModel;
 
-  set setGym(GymModel gym) {
+  set setGym(GymModel? gym) {
     _gymModel = gym;
     notifyListeners();
   }

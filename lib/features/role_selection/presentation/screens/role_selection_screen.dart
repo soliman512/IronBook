@@ -100,8 +100,8 @@ class RoleSelectionScreen extends StatelessWidget {
                           subtitle: 'Manage plans, approve members, chat.',
                           subtitleForegroundColor: const Color(0xFFB5B2AA),
                           onTap: () {
-                            context.read<AuthProvider>().setUserGymMode =
-                                UserGymMode.owner;
+                            context.read<AuthProvider>().setUserRole =
+                                UserRole.owner;
                             Navigator.pushNamed(context, AppRoutes.auth);
                           },
                         ),
@@ -116,8 +116,8 @@ class RoleSelectionScreen extends StatelessWidget {
                           subtitle: 'Join with a Gym ID and track your plan.',
                           subtitleForegroundColor: const Color(0xFFB5B2AA),
                           onTap: () {
-                            context.read<AuthProvider>().setUserGymMode =
-                                UserGymMode.member;
+                            context.read<AuthProvider>().setUserRole =
+                                UserRole.member;
                             Navigator.pushNamed(context, AppRoutes.auth);
                           },
                         ),
@@ -133,7 +133,6 @@ class RoleSelectionScreen extends StatelessWidget {
     );
   }
 }
-
 
 class RoleOptionCard extends StatefulWidget {
   const RoleOptionCard({

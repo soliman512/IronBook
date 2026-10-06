@@ -1,53 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ironbook/core/constants/app_colors.dart';
+import 'package:ironbook/core/global_widgets/main_button.dart';
+import 'package:ironbook/features/owner/models/plan_model.dart';
+import 'package:ironbook/features/auth/providers/gym_provider.dart';
 import 'package:ironbook/core/extenstions/screen_size_extension.dart';
 import 'package:ironbook/core/global_widgets/app_text_form_field.dart';
-import 'package:ironbook/core/global_widgets/main_button.dart';
-import 'package:ironbook/features/auth/providers/gym_provider.dart';
 import 'package:ironbook/features/loading/providers/loading_provider.dart';
-import 'package:ironbook/features/owner/models/plan_model.dart';
 import 'package:ironbook/features/owner/models/services/plan_services.dart';
-import 'package:provider/provider.dart';
 
 class SubscriptionPlansScreen extends StatefulWidget {
-  const SubscriptionPlansScreen({super.key});
-
+  const SubscriptionPlansScreen({
+    super.key,
+    required this.plans,
+    required this.onPlansChanged,
+  });
+  final List<SubscriptionPlan> plans;
+  final Future<void> Function() onPlansChanged;
   @override
   State<SubscriptionPlansScreen> createState() =>
       _SubscriptionPlansScreenState();
 }
 
 class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
-  List<SubscriptionPlan?> _plans = [];
-
-  @override
-  void initState() {
-    super.initState();
-    showAllPlans();
-  }
-
-  Future<void> showAllPlans() async {
-    try {
-      _plans = await PlanServices.getPlans(
-        context.read<GymProvider>().getGym!.id,
-      );
-
-      if (!mounted) return;
-
-      setState(() {});
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Problem when fetching plans, try again later.'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
-    }
-  }
-
   Future<void> _createNewPlan(SubscriptionPlan plan) async {
     try {
       await PlanServices.createPlan(plan);
@@ -94,7 +70,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
     }
   }
 
-  void _showAddSheet() {
+  void _showAddSheet(String gymId) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -109,7 +85,10 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
             if (!mounted) return;
 
-            await showAllPlans();
+            await widget.onPlansChanged();
+
+            if (!mounted) return;
+
             Navigator.pop(context);
           } finally {
             if (mounted) {
@@ -123,6 +102,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final String gymId = context.read<GymProvider>().getGym!.id;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,7 +124,9 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
               ),
               const SizedBox(width: 8),
               FilledButton.icon(
-                onPressed: _showAddSheet,
+                onPressed: () {
+                  _showAddSheet(gymId);
+                },
                 icon: const Icon(Icons.add, size: 21),
                 label: Text(
                   'Add plan',
@@ -166,7 +148,7 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
             ],
           ),
           const SizedBox(height: 18),
-          if (_plans.isEmpty)
+          if (widget.plans.isEmpty)
             const Center(
               child: Column(
                 children: [
@@ -178,19 +160,23 @@ class _SubscriptionPlansScreenState extends State<SubscriptionPlansScreen> {
                 ],
               ),
             ),
-          if (_plans.isNotEmpty)
-            ..._plans.map(
+          if (widget.plans.isNotEmpty)
+            ...widget.plans.map(
               (plan) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: PlanCard(
-                  plan: plan!,
+                  plan: plan,
                   onDelete: () async {
                     context.read<LoadingProvider>().show();
-                    await _deletePlan(plan.id!);
-                    await showAllPlans();
-                    if (!mounted) return;
-                    context.read<LoadingProvider>().hide();
-                    setState(() {});
+
+                    try {
+                      await _deletePlan(plan.id!);
+                      await widget.onPlansChanged();
+                    } finally {
+                      if (context.mounted) {
+                        context.read<LoadingProvider>().hide();
+                      }
+                    }
                   },
                 ),
               ),

@@ -127,7 +127,7 @@ class _ChatScreenState extends State<ChatScreen> {
               //body:
               Column(
                 children: [
-                  //TODO: chat will be here
+                  //: chat will be here
                   Expanded(
                     child: Center(
                       child: Text(
